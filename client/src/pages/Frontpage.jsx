@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Header from "../components/Header";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
@@ -27,7 +28,7 @@ function formatPrice(price) {
   }).format(price);
 }
 
-function Frontpage() {
+function Frontpage({ auth, onLogout }) {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -98,10 +99,11 @@ function Frontpage() {
   }, []);
 
   return (
-    <main className="container">
-      <section className="storefront">
+    <>
+    <Header auth={auth} onLogout={onLogout} />
+      <main className="container">
+        <section className="storefront">
         <div className="page-heading">
-          <p>Min e-handel</p>
 
           <h1>Produkter</h1>
 
@@ -211,7 +213,8 @@ function Frontpage() {
           </>
         )}
       </aside>
-    </main>
+      </main>
+    </>
   );
 }
 
