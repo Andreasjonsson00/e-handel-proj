@@ -37,6 +37,59 @@ ol {
   list-style: none;
 }
 
+.site-header {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.login-page {
+  min-height: 100vh;
+  padding: 24px;
+  display: grid;
+  place-items: center;
+}
+
+.login-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 12px 30px rgb(15 23 42 / 8%);
+}
+
+.login-card {
+  width: min(100%, 420px);
+  padding: 28px;
+}
+
+.form-field {
+  margin-top: 14px;
+  display: grid;
+  gap: 6px;
+  font-weight: 700;
+}
+
+.login-button,
+.form-actions button {
+  min-height: 46px;
+  padding: 0 16px;
+  background-color: #b45309;
+}
+
+.login-button {
+  width: 100%;
+  margin-top: 18px;
+}
+
+.login-button:hover,
+.form-actions button:hover {
+  background-color: #92400e;
+}
+
 .container {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
