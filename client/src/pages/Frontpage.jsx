@@ -32,7 +32,9 @@ function Frontpage({ auth, onLogout }) {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [error, setError] = useState("");
+  const [checkoutMessage, setCheckoutMessage] = useState("");
 
   const cartTotalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
   const cartTotalPrice = cart.reduce(
@@ -74,6 +76,36 @@ function Frontpage({ auth, onLogout }) {
     setCart((currentCart) =>
       currentCart.filter((item) => item.product.id !== productId),
     );
+  }
+
+  async function handleCheckout() {
+    setCheckoutMessage("");
+
+    try {
+      setIsCheckingOut(true);
+
+      await axios.post(
+        `${API_URL}/orders`,
+        {
+          items: cart.map((item) => ({
+            productId: item.product.id,
+            quantity: item.quantity,
+          })),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${auth.token}`,
+          },
+        },
+      );
+
+      setCart([]);
+      setCheckoutMessage("Ordern är skickad! Tack för ditt köp.");
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsCheckingOut(false);
+    }
   }
 
   useEffect(() => {
@@ -159,6 +191,10 @@ function Frontpage({ auth, onLogout }) {
           )}
         </div>
 
+        {checkoutMessage && (
+          <p className="success-message">{checkoutMessage}</p>
+        )}
+
         {cart.length === 0 ? (
           <p className="empty-cart">Din varukorg är tom.</p>
         ) : (
@@ -207,8 +243,13 @@ function Frontpage({ auth, onLogout }) {
               <strong>{formatPrice(cartTotalPrice)}</strong>
             </div>
 
-            <button className="checkout-button" type="button">
-              Gå till kassan
+            <button
+              className="checkout-button"
+              type="button"
+              disabled={isCheckingOut}
+              onClick={handleCheckout}
+            >
+              {isCheckingOut ? "Skickar order..." : "Gå till kassan"}
             </button>
           </>
         )}
