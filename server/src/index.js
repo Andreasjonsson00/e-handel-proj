@@ -9,21 +9,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const demoUsers = [
-  {
-    id: 1,
-    username: "user",
-    password: "user123",
-    role: "user",
-  },
-  {
-    id: 2,
-    username: "admin",
-    password: "admin123",
-    role: "admin",
-  },
-];
-
 const sessions = new Map();
 
 const pool = new Pool({
@@ -61,32 +46,42 @@ app.get("/", (req, res) => {
   res.send("API is running");
 });
 
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
   const { username, password } = req.body;
-  const user = demoUsers.find(
-    (demoUser) =>
-      demoUser.username === username && demoUser.password === password,
-  );
 
-  if (!user) {
-    return res
-      .status(401)
-      .json({ message: "Fel användarnamn eller lösenord." });
+  try {
+    const result = await pool.query(
+      `SELECT id, username, password, role
+       FROM users
+       WHERE username = $1`,
+      [username],
+    );
+
+    const user = result.rows[0];
+
+    if (!user || user.password !== password) {
+      return res
+        .status(401)
+        .json({ message: "Fel användarnamn eller lösenord." });
+    }
+
+    const token = crypto.randomUUID();
+    const publicUser = {
+      id: user.id,
+      username: user.username,
+      role: user.role,
+    };
+
+    sessions.set(token, { user: publicUser });
+
+    res.json({
+      token,
+      user: publicUser,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Serverfel vid inloggning." });
   }
-
-  const token = crypto.randomUUID();
-  const publicUser = {
-    id: user.id,
-    username: user.username,
-    role: user.role,
-  };
-
-  sessions.set(token, { user: publicUser });
-
-  res.json({
-    token,
-    user: publicUser,
-  });
 });
 
 app.get("/me", requireAuth, (req, res) => {
