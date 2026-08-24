@@ -143,7 +143,7 @@ function Frontpage({ auth, onLogout }) {
       <main className="container">
         <section className="storefront">
           <div className="page-heading">
-            <h1>Produkter</h1>
+            <h2>Produkter</h2>
 
             <p>Välj produkter och lägg dem i varukorgen.</p>
           </div>
@@ -168,7 +168,7 @@ function Frontpage({ auth, onLogout }) {
                 </div>
 
                 <div className="product-footer">
-                  <strong>{getProductPrice(product)}</strong>
+                  <strong className="product-price">{getProductPrice(product)}:-</strong>
 
                   <button type="button" onClick={() => addToCart(product)}>
                     Lägg i varukorg
@@ -245,7 +245,7 @@ function Frontpage({ auth, onLogout }) {
               </ul>
 
               <div className="cart-total">
-                <span>Totalt</span>
+                <span>Totalt </span>
                 <strong>{formatPrice(cartTotalPrice)}</strong>
               </div>
 
