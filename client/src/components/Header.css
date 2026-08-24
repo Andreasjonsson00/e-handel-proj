@@ -1,0 +1,9 @@
+.site-header {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
