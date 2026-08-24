@@ -5,7 +5,10 @@ const Header = ({ auth, onLogout }) => {
     <>
       <header className="site-header">
         {" "}
-        <h1>Min e-handel</h1> {auth && <strong>{auth.user.role}</strong>}{" "}
+        <Link to="/">
+          <h1>Min e-handel</h1>
+        </Link>
+        {auth && <strong>{auth.user.role}</strong>}{" "}
         <nav>
           {" "}
           {auth?.user.role === "admin" && (

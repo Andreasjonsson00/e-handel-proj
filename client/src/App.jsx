@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { useState } from "react";
 import Frontpage from "./pages/Frontpage";
 import Login from "./pages/Login";
+import Orders from "./pages/Orders";
 
 function App() {
   const [auth, setAuth] = useState(() => {
@@ -30,6 +31,10 @@ function App() {
         element={
           auth ? <Navigate to="/" replace /> : <Login onLogin={handleLogin} />
         }
+      />
+      <Route
+        path="/orders"
+        element={<Orders auth={auth} onLogout={handleLogout} />}
       />
     </Routes>
   );
