@@ -42,6 +42,46 @@ function requireAuth(req, res, next) {
   next();
 }
 
+function requireAdmin(req, res, next) {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ message: "Du måste vara admin." });
+  }
+
+  next();
+}
+
+function validateProductPayload(req, res, next) {
+  const { name, description, price, image_url } = req.body;
+  const numericPrice = Number(price);
+  const trimmedName = name?.trim();
+  const trimmedDescription = description?.trim();
+  const trimmedImageUrl = image_url?.trim();
+
+  if (
+    !trimmedName ||
+    !trimmedDescription ||
+    !trimmedImageUrl ||
+    !Number.isFinite(numericPrice)
+  ) {
+    return res.status(400).json({
+      message: "Namn, beskrivning, bildlänk och ett giltigt pris krävs.",
+    });
+  }
+
+  if (numericPrice < 0) {
+    return res.status(400).json({ message: "Priset måste vara minst 0." });
+  }
+
+  req.product = {
+    name: trimmedName,
+    description: trimmedDescription,
+    price: numericPrice,
+    image_url: trimmedImageUrl,
+  };
+
+  next();
+}
+
 app.get("/", (req, res) => {
   res.send("API is running");
 });
@@ -106,6 +146,68 @@ app.get("/products", async (req, res) => {
     res.status(500).send("Error fetching products");
   }
 });
+
+app.post(
+  "/products",
+  requireAuth,
+  requireAdmin,
+  validateProductPayload,
+  async (req, res) => {
+    const { name, description, price, image_url } = req.product;
+
+    try {
+      const result = await pool.query(
+        `INSERT INTO products (name, description, price, image_url)
+         VALUES ($1, $2, $3, $4)
+         RETURNING *`,
+        [name, description, price, image_url],
+      );
+
+      res.status(201).json(result.rows[0]);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Error creating product" });
+    }
+  },
+);
+
+app.put(
+  "/products/:id",
+  requireAuth,
+  requireAdmin,
+  validateProductPayload,
+  async (req, res) => {
+    const productId = Number(req.params.id);
+
+    if (!Number.isInteger(productId) || productId <= 0) {
+      return res.status(400).json({ message: "Ogiltigt produkt-id." });
+    }
+
+    const { name, description, price, image_url } = req.product;
+
+    try {
+      const result = await pool.query(
+        `UPDATE products
+         SET name = $1,
+             description = $2,
+             price = $3,
+             image_url = $4
+         WHERE id = $5
+         RETURNING *`,
+        [name, description, price, image_url, productId],
+      );
+
+      if (result.rowCount === 0) {
+        return res.status(404).json({ message: "Produkten hittades inte." });
+      }
+
+      res.json(result.rows[0]);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Error updating product" });
+    }
+  },
+);
 
 app.post("/orders", requireAuth, async (req, res) => {
   const { items } = req.body;
@@ -198,7 +300,7 @@ app.post("/orders", requireAuth, async (req, res) => {
   }
 });
 
-app.get("/orders", requireAuth, async (req, res) => {
+app.get("/orders", requireAuth,requireAdmin, async (req, res) => {
   try {
     const params = [];
     let whereClause = "";

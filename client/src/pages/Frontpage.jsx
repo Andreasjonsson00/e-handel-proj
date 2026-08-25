@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
+import "./Frontpage.css";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 

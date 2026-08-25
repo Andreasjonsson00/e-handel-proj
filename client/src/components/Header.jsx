@@ -1,30 +1,37 @@
 import { Link } from "react-router-dom";
+import "./Header.css";
 
 const Header = ({ auth, onLogout }) => {
   return (
     <>
       <header className="site-header">
-        {" "}
         <Link to="/">
           <h1>Min e-handel</h1>
         </Link>
-        {auth && <strong>{auth.user.role}</strong>}{" "}
+
+        {auth && <strong>{auth.user.role}</strong>}
+
         <nav>
-          {" "}
           {auth?.user.role === "admin" && (
-            <Link to="/orders">
-              <button type="button">Ordrar</button>
-            </Link>
-          )}{" "}
+            <>
+              <Link to="/admin/products">
+                <button type="button">Produkter</button>
+              </Link>
+
+              <Link to="/orders">
+                <button type="button">Ordrar</button>
+              </Link>
+            </>
+          )}
+
           {auth ? (
             <button type="button" onClick={onLogout}>
-              {" "}
-              Logga ut{" "}
+              Logga ut
             </button>
           ) : (
             <Link to="/login">Logga in</Link>
-          )}{" "}
-        </nav>{" "}
+          )}
+        </nav>
       </header>
     </>
   );
