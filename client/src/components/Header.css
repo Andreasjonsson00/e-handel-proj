@@ -7,3 +7,14 @@
   justify-content: space-between;
   gap: 16px;
 }
+
+.site-header nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.site-header button {
+  min-height: 40px;
+  padding: 0 12px;
+}

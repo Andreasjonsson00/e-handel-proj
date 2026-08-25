@@ -45,3 +45,15 @@ ol {
   margin-top: 4px;
   font-size: 40px;
 }
+
+.form-error {
+  margin-top: 14px;
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+.success-message {
+  margin-top: 14px;
+  color: #047857;
+  font-weight: 700;
+}

@@ -3,6 +3,7 @@ import { useState } from "react";
 import Frontpage from "./pages/Frontpage";
 import Login from "./pages/Login";
 import Orders from "./pages/Orders";
+import AdminProducts from "./pages/AdminProducts";
 
 function App() {
   const [auth, setAuth] = useState(() => {
@@ -35,6 +36,10 @@ function App() {
       <Route
         path="/orders"
         element={<Orders auth={auth} onLogout={handleLogout} />}
+      />
+      <Route
+        path="/admin/products"
+        element={<AdminProducts auth={auth} onLogout={handleLogout} />}
       />
     </Routes>
   );
