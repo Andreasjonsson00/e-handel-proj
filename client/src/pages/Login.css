@@ -1,43 +1,11 @@
 
-.login-page {
-  min-height: 100vh;
-  padding: 24px;
-  display: grid;
-  place-items: center;
-}
-
-.login-card {
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background-color: #fff;
-  box-shadow: 0 12px 30px rgb(15 23 42 / 8%);
-}
-
-.login-card {
-  width: min(100%, 420px);
-  padding: 28px;
-}
-
-.form-field {
-  margin-top: 14px;
-  display: grid;
-  gap: 6px;
-  font-weight: 700;
-}
-
-.login-button,
-.form-actions button {
-  min-height: 46px;
-  padding: 0 16px;
-  background-color: #b45309;
-}
-
-.login-button {
-  width: 100%;
-  margin-top: 18px;
-}
-
-.login-button:hover,
-.form-actions button:hover {
-  background-color: #92400e;
-}
+.login-page { min-height: 100vh; padding: 28px; display: grid; place-items: center; }
+.login-card { width: min(100%, 430px); padding: 36px; border: 1px solid rgb(23 53 45 / 10%); border-radius: 20px; background: rgb(255 255 253 / 92%); box-shadow: 0 20px 50px rgb(23 53 45 / 13%); }
+.login-heading p:first-child { color: #4e8067; font-size: .82rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.login-heading h1 { margin: 5px 0 9px; font-size: 2.6rem; }
+.login-heading p:last-child { color: #697a72; font-size: .91rem; }
+.form-field { margin-top: 20px; display: grid; gap: 7px; color: #38574b; font-size: .9rem; font-weight: 700; }
+.login-button, .form-actions button { min-height: 46px; padding: 0 18px; }
+.login-button { width: 100%; margin-top: 24px; background: #c87030; }
+.login-button:hover:not(:disabled) { background: #a85722; }
+@media (max-width: 500px) { .login-page { padding: 18px; } .login-card { padding: 27px 22px; } }
