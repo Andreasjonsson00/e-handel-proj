@@ -18,4 +18,4 @@ Fullstack e-commerce web application built with React and Express, using a cloud
 
 ## About
 
-An e-commerce application built with a React frontend and a Node.js/Express backend. The application uses a PostgreSQL database hosted on Aiven and communicates through a REST API.
+Fullstack web application built with React and Express, backed by a PostgreSQL database. Users can browse products and add them to their cart after logging in. Admin users can add, edit, and delete products, as well as view all orders placed by users.
