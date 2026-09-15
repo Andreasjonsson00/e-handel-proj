@@ -11,6 +11,7 @@ Fullstack e-commerce web application built with React and Express, using a cloud
 - Javascript
 - Node.js
 - Express
+- Axios
 - PostgreSQL
 - Aiven
 - REST API
