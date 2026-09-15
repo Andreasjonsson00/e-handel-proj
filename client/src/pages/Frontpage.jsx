@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import "./Frontpage.css";
 import ProductCard from "../components/ProductCard";
-import CartItem from "../components/CartItem";
+import Cart from "../components/Cart";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
@@ -12,32 +11,11 @@ function getProductName(product) {
   return product.name ?? "Namnlös produkt";
 }
 
-function getNumericPrice(product) {
-  const price = Number(product.price);
-  return Number.isFinite(price) ? price : 0;
-}
-
-function formatPrice(price) {
-  return new Intl.NumberFormat("sv-SE", {
-    style: "currency",
-    currency: "SEK",
-  }).format(price);
-}
-
 function Frontpage({ auth, onLogout }) {
-  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [error, setError] = useState("");
-  const [checkoutMessage, setCheckoutMessage] = useState("");
-
-  const cartTotalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const cartTotalPrice = cart.reduce(
-    (sum, item) => sum + getNumericPrice(item.product) * item.quantity,
-    0,
-  );
 
   function addToCart(product) {
     setCart((currentCart) => {
@@ -73,41 +51,6 @@ function Frontpage({ auth, onLogout }) {
     setCart((currentCart) =>
       currentCart.filter((item) => item.product.id !== productId),
     );
-  }
-
-  async function handleCheckout() {
-    setCheckoutMessage("");
-
-    if (!auth) {
-      navigate("/login");
-      return;
-    }
-
-    try {
-      setIsCheckingOut(true);
-
-      await axios.post(
-        `${API_URL}/orders`,
-        {
-          items: cart.map((item) => ({
-            productId: item.product.id,
-            quantity: item.quantity,
-          })),
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${auth.token}`,
-          },
-        },
-      );
-
-      setCart([]);
-      setCheckoutMessage("Ordern är skickad! Tack för ditt köp.");
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsCheckingOut(false);
-    }
   }
 
   useEffect(() => {
@@ -159,61 +102,15 @@ function Frontpage({ auth, onLogout }) {
             />
           </div>
         </section>
-
-        <aside className="cart" aria-label="Varukorg">
-          <div className="cart-header">
-            <div>
-              <p>Varukorg</p>
-              <h2>{cartTotalQuantity} varor</h2>
-            </div>
-
-            {cart.length > 0 && (
-              <button
-                className="empty-button"
-                type="button"
-                onClick={() => setCart([])}
-              >
-                Töm
-              </button>
-            )}
-          </div>
-
-          {checkoutMessage && (
-            <p className="success-message">{checkoutMessage}</p>
-          )}
-
-          {cart.length === 0 ? (
-            <p className="empty-cart">Din varukorg är tom.</p>
-          ) : (
-            <>
-              <ul className="cart-list">
-                <CartItem
-                  cart={cart}
-                  getProductName={getProductName}
-                  formatPrice={formatPrice}
-                  decreaseQuantity={decreaseQuantity}
-                  addToCart={addToCart}
-                  removeFromCart={removeFromCart}
-                  getNumericPrice={getNumericPrice}
-                />
-              </ul>
-
-              <div className="cart-total">
-                <span>Totalt </span>
-                <strong>{formatPrice(cartTotalPrice)}</strong>
-              </div>
-
-              <button
-                className="checkout-button"
-                type="button"
-                disabled={isCheckingOut}
-                onClick={handleCheckout}
-              >
-                {isCheckingOut ? "Skickar order..." : "Gå till kassan"}
-              </button>
-            </>
-          )}
-        </aside>
+        <Cart
+          cart={cart}
+          setCart={setCart}
+          getProductName={getProductName}
+          decreaseQuantity={decreaseQuantity}
+          addToCart={addToCart}
+          removeFromCart={removeFromCart}
+          auth={auth}
+        />
       </main>
     </>
   );
