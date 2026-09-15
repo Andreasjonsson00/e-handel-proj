@@ -1,9 +1,63 @@
-.site-header { width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: 24px 0 18px; display: flex; align-items: center; justify-content: space-between; gap: 18px; border-bottom: 1px solid rgb(23 53 45 / 12%); }
-.site-header h1 { font-family: "Playfair Display", Georgia, serif; font-size: 1.65rem; letter-spacing: -.045em; }
-.site-header > strong { margin-left: auto; padding: 5px 10px; border-radius: 999px; background: #e2edda; color: #336149; font-size: .78rem; text-transform: capitalize; }
-.site-header nav { display: flex; align-items: center; gap: 8px; }
-.site-header nav a, .site-header button { min-height: 38px; padding: 8px 13px; border-radius: 999px; font-size: .9rem; font-weight: 700; }
-.site-header nav a { color: #36564a; }
-.site-header nav a:hover { background: rgb(255 255 255 / 64%); }
-.site-header nav button { background: #17352d; }
-@media (max-width: 680px) { .site-header { width: min(100% - 28px, 1180px); padding: 16px 0; flex-wrap: wrap; } .site-header h1 { font-size: 1.4rem; } .site-header > strong { margin-left: auto; } .site-header nav { width: 100%; justify-content: flex-end; } }
+.site-header {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 24px 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 1px solid rgb(23 53 45 / 12%);
+}
+.site-header h1 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 1.65rem;
+  letter-spacing: -0.045em;
+}
+.site-header > strong {
+  margin-left: auto;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #e2edda;
+  color: #336149;
+  font-size: 0.78rem;
+  text-transform: capitalize;
+}
+.site-header nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.site-header nav a,
+.site-header button {
+  min-height: 38px;
+  padding: 8px 13px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.site-header nav a {
+  color: #36564a;
+}
+.site-header nav a:hover {
+  background: rgb(255 255 255 / 64%);
+}
+.site-header nav button {
+  background: #17352d;
+}
+@media (max-width: 680px) {
+  .site-header {
+    width: min(100% - 28px, 1180px);
+    padding: 16px 0;
+    flex-wrap: wrap;
+  }
+  .site-header h1 {
+    font-size: 1.4rem;
+  }
+  .site-header > strong {
+    margin-left: auto;
+  }
+  .site-header nav {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

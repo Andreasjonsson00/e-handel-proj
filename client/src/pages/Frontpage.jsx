@@ -3,19 +3,12 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import "./Frontpage.css";
+import ProductCard from "../components/ProductCard";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
 function getProductName(product) {
   return product.name ?? "Namnlös produkt";
-}
-
-function getProductDescription(product) {
-  return product.description ?? "Ingen beskrivning ännu.";
-}
-
-function getProductPrice(product) {
-  return product.price ?? "Pris saknas";
 }
 
 function getNumericPrice(product) {
@@ -158,25 +151,11 @@ function Frontpage({ auth, onLogout }) {
           )}
 
           <div className="product-container">
-            {products.map((product) => (
-              <article className="product-card" key={product.id}>
-                <div>
-                  <h2>{getProductName(product)}</h2>
-
-                  <p>{getProductDescription(product)}</p>
-
-                  <img src={product.image_url} alt={getProductName(product)} />
-                </div>
-
-                <div className="product-footer">
-                  <strong className="product-price">{getProductPrice(product)}:-</strong>
-
-                  <button type="button" onClick={() => addToCart(product)}>
-                    Lägg i varukorg
-                  </button>
-                </div>
-              </article>
-            ))}
+            <ProductCard
+              products={products}
+              addToCart={addToCart}
+              getProductName={getProductName}
+            />
           </div>
         </section>
 
