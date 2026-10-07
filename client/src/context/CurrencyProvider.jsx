@@ -7,10 +7,12 @@ export const CurrencyProvider = ({ children }) => {
   const [rates, setRates] = useState({});
   const [loading, setLoading] = useState(true);
 
+  const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
+
   useEffect(() => {
     const fetchRates = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/currency");
+        const response = await fetch(`${API_URL}/api/currency`);
 
         if (!response.ok) {
           throw new Error("Failed to fetch currency rates");
@@ -27,7 +29,7 @@ export const CurrencyProvider = ({ children }) => {
     };
 
     fetchRates();
-  }, []);
+  }, [API_URL]);
 
   const convertPrice = (price) => {
     if (currency === "SEK") {
