@@ -20,6 +20,16 @@ app.use(productRoutes);
 app.use(orderRoutes);
 app.use(currencyRoutes);
 
+app.use((err, req, res, next) => {
+  const message = err instanceof Error ? err.message : String(err);
+
+  console.error(`${req.method} ${req.originalUrl} failed: ${message}`);
+
+  res.status(500).json({
+    error: "Something went wrong on the server",
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
