@@ -1,7 +1,7 @@
 import getRates from "../integrations/currencyAdapter.js";
 
 const getCurrency = async (req, res) => {
-     try {
+  try {
     const rates = await getRates();
 
     res.json(rates);
