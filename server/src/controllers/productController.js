@@ -1,6 +1,6 @@
 import { pool } from "../db.js";
 
-export async function getProducts(req, res) {
+export async function getProducts(req, res, next) {
   try {
     const result = await pool.query(
       `SELECT * FROM products`,
@@ -8,12 +8,11 @@ export async function getProducts(req, res) {
 
     res.json(result.rows);
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Error fetching products");
+    next(err);
   }
 }
 
-export async function createProduct(req, res) {
+export async function createProduct(req, res, next) {
   const { name, description, price, image_url } = req.product;
 
   try {
@@ -26,12 +25,11 @@ export async function createProduct(req, res) {
 
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error creating product" });
+    next(err);
   }
 }
 
-export async function updateProduct(req, res) {
+export async function updateProduct(req, res, next) {
   const productId = Number(req.params.id);
 
   if (!Number.isInteger(productId) || productId <= 0) {
@@ -58,7 +56,6 @@ export async function updateProduct(req, res) {
 
     res.json(result.rows[0]);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error updating product" });
+    next(err);
   }
 }

@@ -1,12 +1,12 @@
 import getRates from "../integrations/currencyAdapter.js";
 
-const getCurrency = async (req, res) => {
+const getCurrency = async (req, res, next) => {
   try {
     const rates = await getRates();
 
     res.json(rates);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (err) {
+    next(err);
   }
 };
 

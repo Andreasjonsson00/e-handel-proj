@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import { pool } from "../db.js";
 import { sessions } from "../sessions.js";
 
-export async function login(req, res) {
+export async function login(req, res, next) {
   const { username, password } = req.body;
 
   try {
@@ -35,8 +35,7 @@ export async function login(req, res) {
       user: publicUser,
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Serverfel vid inloggning." });
+    next(err);
   }
 }
 

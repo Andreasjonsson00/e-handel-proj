@@ -1,6 +1,6 @@
 import { pool } from "../db.js";
 
-export async function createOrder(req, res) {
+export async function createOrder(req, res, next) {
   const { items } = req.body;
 
   if (!Array.isArray(items) || items.length === 0) {
@@ -84,14 +84,14 @@ export async function createOrder(req, res) {
     });
   } catch (err) {
     await client.query("ROLLBACK");
-    console.error(err);
-    res.status(500).json({ message: "Error creating order" });
+
+    next(err);
   } finally {
     client.release();
   }
 }
 
-export async function getOrders(req, res) {
+export async function getOrders(req, res, next) {
   try {
     const params = [];
     let whereClause = "";
@@ -130,7 +130,6 @@ export async function getOrders(req, res) {
 
     res.json(result.rows);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error fetching orders" });
+    next(err);
   }
 }
