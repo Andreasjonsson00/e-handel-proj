@@ -21,7 +21,14 @@ const ProductCard = ({ products, addToCart, getProductName }) => {
 
             <p>{getProductDescription(product)}</p>
 
-            <img src={product.image_url} alt={getProductName(product)} />
+            <img
+              src={`${product.image_url}?auto=format&fit=crop&w=600&q=75`}
+              alt={getProductName(product)}
+              loading="lazy"
+              decoding="async"
+              width="600"
+              height="400"
+            />
           </div>
 
           <div className="product-footer">

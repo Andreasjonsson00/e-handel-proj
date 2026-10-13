@@ -343,7 +343,12 @@ function AdminProducts({ auth, onLogout }) {
             ) : (
               products.map((product) => (
                 <article className="admin-product-row" key={product.id}>
-                  <img src={product.image_url} alt={product.name} />
+                  <img
+                    src={`${product.image_url}?auto=format&fit=crop&w=300&q=75`}
+                    alt={product.name}
+                    loading="lazy"
+                    decoding="async"
+                  />
 
                   <div>
                     <h2>{product.name}</h2>
