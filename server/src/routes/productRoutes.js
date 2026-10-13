@@ -4,11 +4,12 @@ import {
   getProducts,
   updateProduct,
 } from "../controllers/productController.js";
-import {
-  requireAdmin,
-  requireAuth,
-} from "../middleware/authMiddleware.js";
+import { requireAdmin, requireAuth } from "../middleware/authMiddleware.js";
 import { validateProductPayload } from "../middleware/productMiddleware.js";
+import {
+  importCSV,
+  importXML,
+} from "../controllers/productImportController.js";
 
 const router = express.Router();
 
@@ -27,5 +28,9 @@ router.put(
   validateProductPayload,
   updateProduct,
 );
+
+router.post("/products/import/csv", requireAuth, requireAdmin, importCSV);
+
+router.post("/products/import/xml", requireAuth, requireAdmin, importXML);
 
 export default router;

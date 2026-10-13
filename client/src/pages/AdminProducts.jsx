@@ -21,6 +21,8 @@ function AdminProducts({ auth, onLogout }) {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [isImporting, setIsImporting] = useState(false);
+  const [importResult, setImportResult] = useState(null);
 
   const isEditing = editingProductId !== null;
 
@@ -83,7 +85,11 @@ function AdminProducts({ auth, onLogout }) {
         );
         setMessage("Produkten har uppdaterats.");
       } else {
-        const response = await axios.post(`${API_URL}/products`, payload, config);
+        const response = await axios.post(
+          `${API_URL}/products`,
+          payload,
+          config,
+        );
         setProducts((currentProducts) => [...currentProducts, response.data]);
         setMessage("Produkten har lagts till.");
       }
@@ -94,6 +100,47 @@ function AdminProducts({ auth, onLogout }) {
       setError(err.response?.data?.message ?? "Kunde inte spara produkten.");
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function handleImport(format) {
+    setError("");
+    setMessage("");
+    setImportResult(null);
+
+    try {
+      setIsImporting(true);
+
+      const response = await axios.post(
+        `${API_URL}/products/import/${format}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${auth.token}`,
+          },
+        },
+      );
+
+      setImportResult({
+        format,
+        ...response.data,
+      });
+
+      setMessage(`${format.toUpperCase()}-importen är klar.`);
+
+      const productsResponse = await axios.get(`${API_URL}/products`);
+
+      setProducts(productsResponse.data);
+    } catch (err) {
+      console.error(err);
+
+      setError(
+        err.response?.data?.message ??
+          err.response?.data?.error ??
+          `Kunde inte importera produkter från ${format.toUpperCase()}.`,
+      );
+    } finally {
+      setIsImporting(false);
     }
   }
 
@@ -126,7 +173,59 @@ function AdminProducts({ auth, onLogout }) {
       <main className="admin-products-page">
         <div className="page-heading">
           <h1>Produkter</h1>
-          <p>Lägg till nya produkter och uppdatera befintliga.</p>
+
+          <p>
+            Lägg till nya produkter, uppdatera befintliga eller importera från
+            leverantören.
+          </p>
+
+          <div className="form-actions">
+            <button
+              type="button"
+              onClick={() => handleImport("csv")}
+              disabled={isImporting}
+            >
+              {isImporting ? "Importerar..." : "Importera CSV"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleImport("xml")}
+              disabled={isImporting}
+            >
+              {isImporting ? "Importerar..." : "Importera XML"}
+            </button>
+          </div>
+
+          {error && <p className="form-error">{error}</p>}
+
+
+          {importResult && (
+            <section aria-live="polite">
+              <h2 className="import-result-heading">Importresultat ({importResult.format.toUpperCase()})</h2>
+
+              <p>Nya produkter: {importResult.newProducts}</p>
+
+              <p>Uppdaterade produkter: {importResult.updatedProducts}</p>
+
+              <p>
+                Överhoppade produkter: {importResult.skippedProducts.length}
+              </p>
+
+              {importResult.skippedProducts.length > 0 && (
+                <>
+                  <ul>
+                    {importResult.skippedProducts.map((product, index) => (
+                      <li key={`${product.artNr ?? "product"}-${index}`}>
+                        {product.artNr ?? "Okänt artikelnummer"}:{" "}
+                        {product.reason.join(", ")}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </section>
+          )}
         </div>
 
         <section className="admin-products-layout">
@@ -183,7 +282,11 @@ function AdminProducts({ auth, onLogout }) {
 
             <div className="form-actions">
               <button type="submit" disabled={isSaving}>
-                {isSaving ? "Sparar..." : isEditing ? "Spara ändringar" : "Lägg till"}
+                {isSaving
+                  ? "Sparar..."
+                  : isEditing
+                    ? "Spara ändringar"
+                    : "Lägg till"}
               </button>
 
               {isEditing && (
