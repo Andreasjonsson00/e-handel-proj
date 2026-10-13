@@ -103,6 +103,39 @@ function AdminProducts({ auth, onLogout }) {
     }
   }
 
+  async function handleDeleteProduct(productId) {
+    const confirmed = window.confirm(
+      "Är du säker på att du vill ta bort produkten?",
+    );
+
+    if (!confirmed) return;
+
+    setError("");
+    setMessage("");
+
+    try {
+      await axios.delete(`${API_URL}/products/${productId}`, {
+        headers: {
+          Authorization: `Bearer ${auth.token}`,
+        },
+      });
+
+      setProducts((currentProducts) =>
+        currentProducts.filter((product) => product.id !== productId),
+      );
+
+      setMessage("Produkten har tagits bort.");
+
+      if (editingProductId === productId) {
+        resetForm();
+      }
+    } catch (err) {
+      console.error(err);
+
+      setError(err.response?.data?.message ?? "Kunde inte ta bort produkten.");
+    }
+  }
+
   async function handleImport(format) {
     setError("");
     setMessage("");
@@ -199,10 +232,11 @@ function AdminProducts({ auth, onLogout }) {
 
           {error && <p className="form-error">{error}</p>}
 
-
           {importResult && (
             <section aria-live="polite">
-              <h2 className="import-result-heading">Importresultat ({importResult.format.toUpperCase()})</h2>
+              <h2 className="import-result-heading">
+                Importresultat ({importResult.format.toUpperCase()})
+              </h2>
 
               <p>Nya produkter: {importResult.newProducts}</p>
 
@@ -319,6 +353,13 @@ function AdminProducts({ auth, onLogout }) {
 
                   <button type="button" onClick={() => startEditing(product)}>
                     Redigera
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteProduct(product.id)}
+                  >
+                    Ta bort
                   </button>
                 </article>
               ))

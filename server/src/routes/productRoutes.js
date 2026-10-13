@@ -3,6 +3,7 @@ import {
   createProduct,
   getProducts,
   updateProduct,
+  deleteProduct,
 } from "../controllers/productController.js";
 import { requireAdmin, requireAuth } from "../middleware/authMiddleware.js";
 import { validateProductPayload } from "../middleware/productMiddleware.js";
@@ -28,6 +29,8 @@ router.put(
   validateProductPayload,
   updateProduct,
 );
+
+router.delete("/products/:id", requireAuth, requireAdmin, deleteProduct);
 
 router.post("/products/import/csv", requireAuth, requireAdmin, importCSV);
 
