@@ -9,8 +9,13 @@ const Orders = ({ auth, onLogout }) => {
   const [orders, setOrders] = useState([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [showLoader, setShowLoader] = useState(false);
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowLoader(true);
+    }, 500);
+
     async function fetchOrders() {
       if (!auth) {
         setError("Du måste vara inloggad för att se ordrar.");
@@ -20,6 +25,7 @@ const Orders = ({ auth, onLogout }) => {
       try {
         setIsLoading(true);
         setError(null);
+
         const response = await axios.get(`${API_URL}/orders`, {
           headers: {
             Authorization: `Bearer ${auth.token}`,
@@ -29,13 +35,14 @@ const Orders = ({ auth, onLogout }) => {
       } catch (err) {
         console.error(err);
         setError("Kunde inte hämta ordrar. Logga in igen och försök på nytt.");
-      }
-      finally {
+      } finally {
         setIsLoading(false);
+        clearTimeout(timer);
       }
     }
 
     fetchOrders();
+    return () => clearTimeout(timer);
   }, [auth]);
   return (
     <>
@@ -46,10 +53,14 @@ const Orders = ({ auth, onLogout }) => {
           <p>Här visas skapade ordrar och produkterna i varje order.</p>
         </div>
 
-        {error ? (
+        {isLoading ? (
+          showLoader && (
+            <div className="loader-container">
+              <div className="loader"></div>
+            </div>
+          )
+        ) : error ? (
           <p>{error}</p>
-        ) : isLoading ? (
-          <p>Laddar ordrar...</p>
         ) : orders.length === 0 ? (
           <p>Inga ordrar hittades.</p>
         ) : (

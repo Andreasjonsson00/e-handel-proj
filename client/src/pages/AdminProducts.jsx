@@ -18,6 +18,7 @@ function AdminProducts({ auth, onLogout }) {
   const [form, setForm] = useState(emptyForm);
   const [editingProductId, setEditingProductId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showLoader, setShowLoader] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -178,6 +179,10 @@ function AdminProducts({ auth, onLogout }) {
   }
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowLoader(true);
+    }, 500);
+
     async function fetchProducts() {
       try {
         setIsLoading(true);
@@ -190,10 +195,12 @@ function AdminProducts({ auth, onLogout }) {
         setError("Kunde inte hämta produkter.");
       } finally {
         setIsLoading(false);
+        clearTimeout(timer);
       }
     }
 
     fetchProducts();
+    return () => clearTimeout(timer);
   }, []);
 
   if (!auth || auth.user.role !== "admin") {
@@ -337,9 +344,15 @@ function AdminProducts({ auth, onLogout }) {
 
           <section className="admin-products-list" aria-label="Produktlista">
             {isLoading ? (
-              <p>Hämtar produkter...</p>
+              showLoader && (
+                <div className="loader-container">
+                  <div className="loader"></div>
+                </div>
+              )
+            ) : error ? (
+              <p>{error}</p>
             ) : products.length === 0 ? (
-              <p>Det finns inga produkter ännu.</p>
+              <p>Det finns inga produkter i databasen ännu.</p>
             ) : (
               products.map((product) => (
                 <article className="admin-product-row" key={product.id}>
