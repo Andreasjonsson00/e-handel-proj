@@ -16,6 +16,7 @@ function Frontpage({ auth, onLogout }) {
   const [cart, setCart] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showLoader, setShowLoader] = useState(false);
 
   function addToCart(product) {
     setCart((currentCart) => {
@@ -54,6 +55,10 @@ function Frontpage({ auth, onLogout }) {
   }
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowLoader(true);
+    }, 500);
+
     async function fetchProducts() {
       try {
         setIsLoading(true);
@@ -69,10 +74,12 @@ function Frontpage({ auth, onLogout }) {
         );
       } finally {
         setIsLoading(false);
+        clearTimeout(timer);
       }
     }
 
     fetchProducts();
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -86,8 +93,6 @@ function Frontpage({ auth, onLogout }) {
             <p>Välj produkter och lägg dem i varukorgen.</p>
           </div>
 
-          {isLoading && <p>Hämtar produkter...</p>}
-
           {error && <p>{error}</p>}
 
           {!isLoading && !error && products.length === 0 && (
@@ -95,11 +100,23 @@ function Frontpage({ auth, onLogout }) {
           )}
 
           <div className="product-container">
-            <ProductCard
-              products={products}
-              addToCart={addToCart}
-              getProductName={getProductName}
-            />
+            {isLoading ? (
+              showLoader && (
+                <div className="loader-container">
+                  <div className="loader"></div>
+                </div>
+              )
+            ) : error ? (
+              <p>{error}</p>
+            ) : products.length === 0 ? (
+              <p>Det finns inga produkter i databasen ännu.</p>
+            ) : (
+              <ProductCard
+                products={products}
+                addToCart={addToCart}
+                getProductName={getProductName}
+              />
+            )}
           </div>
         </section>
         <Cart
