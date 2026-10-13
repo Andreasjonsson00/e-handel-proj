@@ -25,7 +25,8 @@ for (const product of supplierProducts) {
   }
 }
 
-// Anpassa endast produkter som klarade valideringen
+console.log("Giltiga produkter:", validProducts.length);
+
 const adaptedProducts = validProducts.map(adaptSupplierProduct);
 
 let newProducts = 0;
