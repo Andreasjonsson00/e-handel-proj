@@ -59,3 +59,26 @@ export async function updateProduct(req, res, next) {
     next(err);
   }
 }
+
+export async function deleteProduct(req, res, next) {
+  const productId = Number(req.params.id);
+
+  if (!Number.isInteger(productId) || productId <= 0) {
+    return res.status(400).json({ message: "Ogiltigt produkt-id." });
+  }
+
+  try {
+    const result = await pool.query(
+      `DELETE FROM products WHERE id = $1 RETURNING *`,
+      [productId],
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "Produkten hittades inte." });
+    }
+
+    res.json({ message: "Produkten har tagits bort." });
+  } catch (err) {
+    next(err);
+  }
+}
