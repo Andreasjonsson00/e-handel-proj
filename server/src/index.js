@@ -5,6 +5,8 @@ import authRoutes from "./routes/authRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import currencyRoutes from "./routes/currencyRoutes.js";
+// import adminRoutes from "./routes/adminRoutes.js";
+// import searchRoutes from "./routes/searchRoutes.js";
 
 const app = express();
 
@@ -15,10 +17,12 @@ app.get("/", (req, res) => {
   res.send("API is running");
 });
 
-app.use(authRoutes);
-app.use(productRoutes);
-app.use(orderRoutes);
-app.use(currencyRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/currency", currencyRoutes);
+// app.use("/api/admin", adminRoutes);
+// app.use("/api/search", searchRoutes);
 
 app.use((err, req, res, next) => {
   const message = err instanceof Error ? err.message : String(err);

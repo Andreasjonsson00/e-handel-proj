@@ -64,7 +64,7 @@ function Frontpage({ auth, onLogout }) {
         setIsLoading(true);
         setError(null);
 
-        const response = await axios.get(`${API_URL}/products`);
+        const response = await axios.get(`${API_URL}/api/products`);
         setProducts(response.data);
       } catch (err) {
         console.error(err);

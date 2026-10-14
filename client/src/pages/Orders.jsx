@@ -26,7 +26,7 @@ const Orders = ({ auth, onLogout }) => {
         setIsLoading(true);
         setError(null);
 
-        const response = await axios.get(`${API_URL}/orders`, {
+        const response = await axios.get(`${API_URL}/api/orders`, {
           headers: {
             Authorization: `Bearer ${auth.token}`,
           },
