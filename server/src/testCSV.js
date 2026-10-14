@@ -1,11 +1,11 @@
 import "dotenv/config";
-import { fetchElectronicsCSV } from "./services/supplierService.js";
-import { parseProductsCSV } from "./services/csvParser.js";
+import { fetchProductsCSV } from "./integrations/productAdapter.js";
+import { parseProductsCSV } from "./integrations/productAdapter.js";
 import { adaptSupplierProduct } from "./integrations/productAdapter.js";
 import { supplierProductSchema } from "./schemas/supplierProductSchema.js";
 import { importProduct } from "./services/productImportService.js";
 
-const csvData = await fetchElectronicsCSV();
+const csvData = await fetchProductsCSV();
 
 const supplierProducts = parseProductsCSV(csvData);
 

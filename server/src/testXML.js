@@ -1,11 +1,11 @@
 import "dotenv/config";
-import { fetchElectronicsXML } from "./services/supplierService.js";
-import { parseProductsXML } from "./services/xmlParser.js";
-import { supplierProductSchema } from "./schemas/supplierProductSchema.js";
+import { fetchProductsXML } from "./integrations/productAdapter.js";
+import { parseProductsXML } from "./integrations/productAdapter.js";
 import { adaptSupplierProduct } from "./integrations/productAdapter.js";
+import { supplierProductSchema } from "./schemas/supplierProductSchema.js";
 import { importProduct } from "./services/productImportService.js";
 
-const xmlData = await fetchElectronicsXML();
+const xmlData = await fetchProductsXML();
 const products = parseProductsXML(xmlData);
 
 const validProducts = [];
