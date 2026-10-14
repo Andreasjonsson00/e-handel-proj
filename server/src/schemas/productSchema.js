@@ -14,4 +14,7 @@ export const productSchema = z.object({
     message: "Description is required",
   }),
   image_url: z.string().url().nullable(),
+  category: z.string().trim().min(1, {
+    message: "Category is required",
+  }),
 });

@@ -78,14 +78,14 @@ export function parseProductsXML(xmlData) {
     uppdaterad: product.uppdaterad,
   }));
 }
-
 export function adaptSupplierProduct(product) {
   return {
     article_number: product.artNr,
     name: product.benamning,
     price: Number(product.pris.replace(",", ".")),
-    description: product.kategori,
+    description: product.benamning,
     image_url: null,
+    category: product.kategori,
   };
 }
 
@@ -103,6 +103,9 @@ export function validateAndAdaptProducts(products) {
       });
       continue;
     }
+
+console.log("Leverantörens kategori:", supplierValidation.data.kategori);
+
 
     const adaptedProduct = adaptSupplierProduct(supplierValidation.data);
     const productValidation = productSchema.safeParse(adaptedProduct);
