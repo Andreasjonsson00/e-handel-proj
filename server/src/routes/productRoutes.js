@@ -14,26 +14,26 @@ import {
 
 const router = express.Router();
 
-router.get("/products", getProducts);
+router.get("/", getProducts);
 router.post(
-  "/products",
+  "/",
   requireAuth,
   requireAdmin,
   validateProductPayload,
   createProduct,
 );
 router.put(
-  "/products/:id",
+  "/:id",
   requireAuth,
   requireAdmin,
   validateProductPayload,
   updateProduct,
 );
 
-router.delete("/products/:id", requireAuth, requireAdmin, deleteProduct);
+router.delete("/:id", requireAuth, requireAdmin, deleteProduct);
 
-router.post("/products/import/csv", requireAuth, requireAdmin, importCSV);
+router.post("/import/csv", requireAuth, requireAdmin, importCSV);
 
-router.post("/products/import/xml", requireAuth, requireAdmin, importXML);
+router.post("/import/xml", requireAuth, requireAdmin, importXML);
 
 export default router;

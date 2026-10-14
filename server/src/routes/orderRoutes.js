@@ -7,7 +7,7 @@ import {
 
 const router = express.Router();
 
-router.post("/orders", requireAuth, createOrder);
-router.get("/orders", requireAuth, requireAdmin, getOrders);
+router.post("/", requireAuth, createOrder);
+router.get("/", requireAuth, requireAdmin, getOrders);
 
 export default router;

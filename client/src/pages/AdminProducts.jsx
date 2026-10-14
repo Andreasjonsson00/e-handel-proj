@@ -74,7 +74,7 @@ function AdminProducts({ auth, onLogout }) {
 
       if (isEditing) {
         const response = await axios.put(
-          `${API_URL}/products/${editingProductId}`,
+          `${API_URL}/api/products/${editingProductId}`,
           payload,
           config,
         );
@@ -87,7 +87,7 @@ function AdminProducts({ auth, onLogout }) {
         setMessage("Produkten har uppdaterats.");
       } else {
         const response = await axios.post(
-          `${API_URL}/products`,
+          `${API_URL}/api/products`,
           payload,
           config,
         );
@@ -115,7 +115,7 @@ function AdminProducts({ auth, onLogout }) {
     setMessage("");
 
     try {
-      await axios.delete(`${API_URL}/products/${productId}`, {
+      await axios.delete(`${API_URL}/api/products/${productId}`, {
         headers: {
           Authorization: `Bearer ${auth.token}`,
         },
@@ -146,7 +146,7 @@ function AdminProducts({ auth, onLogout }) {
       setIsImporting(true);
 
       const response = await axios.post(
-        `${API_URL}/products/import/${format}`,
+        `${API_URL}/api/products/import/${format}`,
         {},
         {
           headers: {
@@ -162,7 +162,7 @@ function AdminProducts({ auth, onLogout }) {
 
       setMessage(`${format.toUpperCase()}-importen är klar.`);
 
-      const productsResponse = await axios.get(`${API_URL}/products`);
+      const productsResponse = await axios.get(`${API_URL}/api/products`);
 
       setProducts(productsResponse.data);
     } catch (err) {
@@ -188,7 +188,7 @@ function AdminProducts({ auth, onLogout }) {
         setIsLoading(true);
         setError("");
 
-        const response = await axios.get(`${API_URL}/products`);
+        const response = await axios.get(`${API_URL}/api/products`);
         setProducts(response.data);
       } catch (err) {
         console.error(err);

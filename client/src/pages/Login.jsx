@@ -24,7 +24,7 @@ function Login({ onLogin }) {
     setError("");
 
     try {
-      const response = await axios.post(`${API_URL}/login`, form);
+      const response = await axios.post(`${API_URL}/api/auth/login`, form);
       onLogin(response.data);
     } catch (err) {
       console.error(err);

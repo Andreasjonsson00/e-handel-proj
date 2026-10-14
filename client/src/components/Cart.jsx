@@ -48,7 +48,7 @@ const Cart = ({
       setIsCheckingOut(true);
 
       await axios.post(
-        `${API_URL}/orders`,
+        `${API_URL}/api/orders`,
         {
           items: cart.map((item) => ({
             productId: item.product.id,
