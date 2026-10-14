@@ -1,6 +1,7 @@
 import { parse } from "csv-parse/sync";
 import { XMLParser } from "fast-xml-parser";
 import { supplierProductSchema } from "../schemas/supplierProductSchema.js";
+import { productSchema } from "../schemas/productSchema.js";
 
 const API_URL = "https://leverantor-api.vercel.app/v1/export";
 
@@ -93,18 +94,28 @@ export function validateAndAdaptProducts(products) {
   const skippedProducts = [];
 
   for (const product of products) {
-    const validation = supplierProductSchema.safeParse(product);
+    const supplierValidation = supplierProductSchema.safeParse(product);
 
-    if (!validation.success) {
+    if (!supplierValidation.success) {
       skippedProducts.push({
         artNr: product.artNr,
-        reason: validation.error.issues.map((issue) => issue.message),
+        reason: supplierValidation.error.issues.map((issue) => issue.message),
       });
-
       continue;
     }
 
-    validProducts.push(adaptSupplierProduct(validation.data));
+    const adaptedProduct = adaptSupplierProduct(supplierValidation.data);
+    const productValidation = productSchema.safeParse(adaptedProduct);
+
+    if (!productValidation.success) {
+      skippedProducts.push({
+        artNr: product.artNr,
+        reason: productValidation.error.issues.map((issue) => issue.message),
+      });
+      continue;
+    }
+
+    validProducts.push(productValidation.data);
   }
 
   return {
