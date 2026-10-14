@@ -7,15 +7,17 @@ export async function importProduct(product) {
       name,
       price,
       description,
-      image_url
+      image_url,
+      category
     )
-    VALUES ($1, $2, $3, $4, $5)
+    VALUES ($1, $2, $3, $4, $5, $6)
     ON CONFLICT (article_number)
     DO UPDATE SET
       name = EXCLUDED.name,
       price = EXCLUDED.price,
       description = EXCLUDED.description,
-      image_url = EXCLUDED.image_url
+      image_url = EXCLUDED.image_url,
+      category = EXCLUDED.category
     RETURNING id, (xmax = 0) AS inserted;
   `;
 
@@ -25,6 +27,7 @@ export async function importProduct(product) {
     product.price,
     product.description,
     product.image_url,
+    product.category,
   ];
 
   const result = await pool.query(query, values);
