@@ -1,3 +1,4 @@
+import { frankfurterSchema } from "../schemas/currencySchema.js";
 import { z } from "zod";
 
 const baseUrl = "https://api.frankfurter.dev/v1";
@@ -7,13 +8,6 @@ const MAX_ATTEMPTS = 3;
 let cache = null;
 let cacheTime = 0;
 const cacheSeconds = Number(process.env.CURRENCY_CACHE_SECONDS || 3600);
-
-const FrankfurterResponse = z.object({
-  amount: z.number(),
-  base: z.string(),
-  date: z.string(),
-  rates: z.record(z.string(), z.number()),
-});
 
 async function getRates(base = "SEK", symbols = "EUR,USD,GBP") {
   const url = new URL(`${baseUrl}/latest`);
@@ -45,7 +39,7 @@ async function getRates(base = "SEK", symbols = "EUR,USD,GBP") {
     if (response.ok) {
       const data = await response.json();
 
-      const parsed = FrankfurterResponse.safeParse(data);
+      const parsed = frankfurterSchema.safeParse(data);
 
       if (!parsed.success) {
         throw new Error(
