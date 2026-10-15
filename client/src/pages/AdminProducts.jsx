@@ -9,6 +9,7 @@ const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 const emptyForm = {
   name: "",
   description: "",
+  category: "",
   price: "",
   image_url: "",
 };
@@ -43,6 +44,7 @@ function AdminProducts({ auth, onLogout }) {
       description: product.description ?? "",
       price: product.price ?? "",
       image_url: product.image_url ?? "",
+      category: product.category ?? "",
     });
     setMessage("");
     setError("");
@@ -290,6 +292,16 @@ function AdminProducts({ auth, onLogout }) {
                 value={form.description}
                 onChange={updateField}
                 rows="4"
+                required
+              />
+            </label>
+
+            <label className="form-field">
+              Kategori
+              <input
+                name="category"
+                value={form.category}
+                onChange={updateField}
                 required
               />
             </label>

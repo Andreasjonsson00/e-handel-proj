@@ -1,4 +1,19 @@
 import { pool } from "../db.js";
+import { indexProducts } from "../integrations/searchAdapter.js";
+
+/* --- INDEX ALL: POST /api/admin/search/index --- */
+// Sends ALL products to Algolia. Needed the first time, and when the index has fallen behind the DB.
+export async function indexAllProducts(req, res, next) {
+  try {
+    const result = await pool.query(`SELECT * FROM products`);
+    const indexedProducts = await indexProducts(result.rows);
+
+    res.json(indexedProducts);
+  } catch (err) {
+    next(err);
+  }
+}
+
 
 export async function getProducts(req, res, next) {
   try {
@@ -13,14 +28,14 @@ export async function getProducts(req, res, next) {
 }
 
 export async function createProduct(req, res, next) {
-  const { name, description, price, image_url } = req.product;
+  const { name, description, price, image_url, category } = req.product;
 
   try {
     const result = await pool.query(
-      `INSERT INTO products (name, description, price, image_url)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO products (name, description, price, image_url, category)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
-      [name, description, price, image_url],
+      [name, description, price, image_url, category],
     );
 
     res.status(201).json(result.rows[0]);
@@ -36,7 +51,7 @@ export async function updateProduct(req, res, next) {
     return res.status(400).json({ message: "Ogiltigt produkt-id." });
   }
 
-  const { name, description, price, image_url } = req.product;
+  const { name, description, price, image_url, category } = req.product;
 
   try {
     const result = await pool.query(
@@ -44,10 +59,11 @@ export async function updateProduct(req, res, next) {
        SET name = $1,
            description = $2,
            price = $3,
-           image_url = $4
-       WHERE id = $5
+           image_url = $4,
+            category = $5
+       WHERE id = $6
        RETURNING *`,
-      [name, description, price, image_url, productId],
+      [name, description, price, image_url, category, productId],
     );
 
     if (result.rowCount === 0) {
