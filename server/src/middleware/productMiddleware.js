@@ -1,9 +1,10 @@
 export function validateProductPayload(req, res, next) {
-  const { name, description, price, image_url } = req.body;
+  const { name, description, price, image_url, category } = req.body;
   const numericPrice = Number(price);
   const trimmedName = name?.trim();
   const trimmedDescription = description?.trim();
   const trimmedImageUrl = image_url?.trim();
+  const trimmedCategory = category?.trim();
 
   if (
     !trimmedName ||
@@ -25,6 +26,7 @@ export function validateProductPayload(req, res, next) {
     description: trimmedDescription,
     price: numericPrice,
     image_url: trimmedImageUrl,
+    category: trimmedCategory,
   };
 
   next();

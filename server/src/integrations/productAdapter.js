@@ -104,9 +104,6 @@ export function validateAndAdaptProducts(products) {
       continue;
     }
 
-console.log("Leverantörens kategori:", supplierValidation.data.kategori);
-
-
     const adaptedProduct = adaptSupplierProduct(supplierValidation.data);
     const productValidation = productSchema.safeParse(adaptedProduct);
 
