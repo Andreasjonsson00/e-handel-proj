@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./Header.css";
 import { useCurrency } from "../context/CurrencyProvider";
 import { useState } from "react";
@@ -7,6 +7,8 @@ const Header = ({ auth, onLogout }) => {
   const { currency, setCurrency } = useCurrency();
   const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
   const [isCurrencyMenuOpen, setIsCurrencyMenuOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   return (
     <>
@@ -79,7 +81,9 @@ const Header = ({ auth, onLogout }) => {
               Logga ut
             </button>
           ) : (
-            <Link to="/login">Logga in</Link>
+            <button type="button" onClick={() => navigate("/login")}>
+              Logga in
+            </button>
           )}
         </nav>
       </header>

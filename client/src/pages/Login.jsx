@@ -38,7 +38,7 @@ function Login({ onLogin }) {
         <div className="login-heading">
           <p>Min e-handel</p>
           <h1>Logga in</h1>
-          <p>Demo: user/user123 eller admin/admin123.</p>
+          <p>Demo: user/user123</p>
         </div>
 
         <label className="form-field">
