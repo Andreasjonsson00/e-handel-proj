@@ -93,6 +93,8 @@ function Frontpage({ auth, onLogout }) {
             <p>Välj produkter och lägg dem i varukorgen.</p>
           </div>
 
+          <div className="search-container" id="autocomplete"></div>
+
           {error && <p>{error}</p>}
 
           {!isLoading && !error && products.length === 0 && (

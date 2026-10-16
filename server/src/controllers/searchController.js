@@ -1,0 +1,40 @@
+// import { pool } from "../db.js";
+import { z } from "zod";
+import { searchProducts } from "../integrations/searchAdapter.js";
+
+// Here we validate data from the USER before sending it on to another system.
+const SearchQuery = z.object({
+  q: z.string().max(100).default(""),
+  category: z.string().max(100).optional(),
+  page: z.coerce.number().int().min(1).default(1), // '2' => 2
+  pageSize: z.coerce.number().int().min(1).max(50).default(10), // max '50' => 50
+});
+
+// GET /api/search?q=hoodie → search in Algolia
+// Anyone may do this: it only READS, with the search key.
+export async function search(req, res, next) {
+  // const searchText = typeof req.query.q === 'string' ? req.query.q : ''
+  // 1. Validate the parameters
+  const result = SearchQuery.safeParse(req.query);
+  if (!result.success) {
+    res
+      .status(400)
+      .json({
+        error: "Invalid search parameters",
+        details: z.prettifyError(result.error),
+      });
+    return;
+  }
+
+  // 2. The adapter searches and returns OUR model: a list of products
+  try {
+    const products = await searchProducts(
+      result.data.q,
+      result.data.page,
+      result.data.pageSize,
+    );
+    res.json(products);
+  } catch (error) {
+    next(error);
+  }
+}

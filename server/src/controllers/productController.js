@@ -1,5 +1,8 @@
 import { pool } from "../db.js";
-import { indexProducts } from "../integrations/searchAdapter.js";
+import {
+  indexProducts,
+  removeProducts,
+} from "../integrations/searchAdapter.js";
 
 /* --- INDEX ALL: POST /api/admin/search/index --- */
 // Sends ALL products to Algolia. Needed the first time, and when the index has fallen behind the DB.
@@ -8,18 +11,15 @@ export async function indexAllProducts(req, res, next) {
     const result = await pool.query(`SELECT * FROM products`);
     const indexedProducts = await indexProducts(result.rows);
 
-    res.json(indexedProducts);
+    res.json({ indexedProducts, searchIndexed: true });
   } catch (err) {
     next(err);
   }
 }
 
-
 export async function getProducts(req, res, next) {
   try {
-    const result = await pool.query(
-      `SELECT * FROM products`,
-    );
+    const result = await pool.query(`SELECT * FROM products`);
 
     res.json(result.rows);
   } catch (err) {
@@ -30,6 +30,9 @@ export async function getProducts(req, res, next) {
 export async function createProduct(req, res, next) {
   const { name, description, price, image_url, category } = req.product;
 
+  // 1. Save first in DB
+  // 2. If all is well,  index the new product in Algolia.
+  let newProduct;
   try {
     const result = await pool.query(
       `INSERT INTO products (name, description, price, image_url, category)
@@ -38,9 +41,17 @@ export async function createProduct(req, res, next) {
       [name, description, price, image_url, category],
     );
 
-    res.status(201).json(result.rows[0]);
+    newProduct = result.rows[0];
   } catch (err) {
-    next(err);
+    return next(err);
+  }
+
+  try {
+    await indexProducts([newProduct]);
+    res.status(201).json({ newProduct, searchIndexed: true });
+  } catch (err) {
+    console.warn("Could not index the new product to Algolia:", err);
+    res.status(201).json({ newProduct, searchIndexed: false });
   }
 }
 
@@ -53,6 +64,7 @@ export async function updateProduct(req, res, next) {
 
   const { name, description, price, image_url, category } = req.product;
 
+  let updatedProduct;
   try {
     const result = await pool.query(
       `UPDATE products
@@ -70,9 +82,17 @@ export async function updateProduct(req, res, next) {
       return res.status(404).json({ message: "Produkten hittades inte." });
     }
 
-    res.json(result.rows[0]);
+    updatedProduct = result.rows[0];
   } catch (err) {
-    next(err);
+    return next(err);
+  }
+
+  try {
+    await indexProducts([updatedProduct]);
+    res.status(200).json({ updatedProduct, searchIndexed: true });
+  } catch (err) {
+    console.warn("Could not index the updated product to Algolia:", err);
+    res.status(201).json({ updatedProduct, searchIndexed: false });
   }
 }
 
@@ -83,6 +103,7 @@ export async function deleteProduct(req, res, next) {
     return res.status(400).json({ message: "Ogiltigt produkt-id." });
   }
 
+  let deletedProduct;
   try {
     const result = await pool.query(
       `DELETE FROM products WHERE id = $1 RETURNING *`,
@@ -93,8 +114,16 @@ export async function deleteProduct(req, res, next) {
       return res.status(404).json({ message: "Produkten hittades inte." });
     }
 
-    res.json({ message: "Produkten har tagits bort." });
+    deletedProduct = result.rows[0];
   } catch (err) {
-    next(err);
+    return next(err);
+  }
+
+  try {
+    await removeProducts([deletedProduct.article_number]);
+    res.status(200).json({ deletedProduct, searchIndexed: true });
+  } catch (err) {
+    console.warn("Could not index the deleted product to Algolia:", err);
+    res.status(201).json({ deletedProduct, searchIndexed: false });
   }
 }
