@@ -80,7 +80,22 @@
 .import-result-heading {
   margin: 22px 0;
 }
-
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+.pagination button {
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  width: 120px;
+}
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 @media (max-width: 900px) {
   .admin-products-layout {
     grid-template-columns: 1fr;

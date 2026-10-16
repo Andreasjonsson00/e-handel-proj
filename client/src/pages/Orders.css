@@ -1,5 +1,5 @@
 .orders-page {
-  width: min(900px, calc(100% - 40px));
+  width: min(1180px, calc(100% - 40px));
   margin: 0 auto;
   padding: 48px 0 64px;
 }

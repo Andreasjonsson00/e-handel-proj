@@ -64,8 +64,9 @@ img {
 
 .product-footer button {
   min-height: 42px;
-  padding: 0 15px;
+  padding: 3px 15px;
   font-size: 0.88rem;
+  white-space: nowrap;
 }
 
 @media (prefers-reduced-motion: reduce) {
