@@ -28,11 +28,14 @@ export async function login(req, res, next) {
       role: user.role,
     };
 
-    sessions.set(token, { user: publicUser });
+    const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
+
+    sessions.set(token, { user: publicUser, expiresAt });
 
     res.json({
       token,
       user: publicUser,
+      expiresAt,
     });
   } catch (err) {
     next(err);

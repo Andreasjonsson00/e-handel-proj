@@ -83,7 +83,9 @@ function AdminProducts({ auth, onLogout }) {
 
         setProducts((currentProducts) =>
           currentProducts.map((product) =>
-            product.id === editingProductId ? response.data : product,
+            product.id === editingProductId
+              ? response.data.updatedProduct
+              : product,
           ),
         );
         setMessage("Produkten har uppdaterats.");

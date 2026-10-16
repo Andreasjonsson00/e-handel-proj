@@ -18,6 +18,9 @@ function Frontpage({ auth, onLogout }) {
   const [error, setError] = useState("");
   const [showLoader, setShowLoader] = useState(false);
 
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+
   function addToCart(product) {
     setCart((currentCart) => {
       const existingItem = currentCart.find(
@@ -64,8 +67,11 @@ function Frontpage({ auth, onLogout }) {
         setIsLoading(true);
         setError(null);
 
-        const response = await axios.get(`${API_URL}/api/products`);
+        const response = await axios.get(
+          `${API_URL}/api/products?page=${page}&pageSize=9`,
+        );
         setProducts(response.data);
+        setTotalPages(response.data.meta.totalPages);
       } catch (err) {
         console.error(err);
 
@@ -80,7 +86,7 @@ function Frontpage({ auth, onLogout }) {
 
     fetchProducts();
     return () => clearTimeout(timer);
-  }, []);
+  }, [page]);
 
   return (
     <>
@@ -92,6 +98,8 @@ function Frontpage({ auth, onLogout }) {
 
             <p>Välj produkter och lägg dem i varukorgen.</p>
           </div>
+
+          <div className="search-container" id="autocomplete"></div>
 
           {error && <p>{error}</p>}
 
@@ -112,12 +120,33 @@ function Frontpage({ auth, onLogout }) {
               <p>Det finns inga produkter i databasen ännu.</p>
             ) : (
               <ProductCard
-                products={products}
+                products={products.data}
                 addToCart={addToCart}
                 getProductName={getProductName}
               />
             )}
           </div>
+          {!isLoading && !error && totalPages > 1 && (
+            <div className="pagination">
+              <button
+                onClick={() => setPage((currentPage) => currentPage - 1)}
+                disabled={page === 1}
+              >
+                Föregående
+              </button>
+
+              <span>
+                Sida {page} av {totalPages}
+              </span>
+
+              <button
+                onClick={() => setPage((currentPage) => currentPage + 1)}
+                disabled={page >= totalPages}
+              >
+                Nästa
+              </button>
+            </div>
+          )}
         </section>
         <Cart
           cart={cart}

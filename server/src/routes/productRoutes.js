@@ -11,6 +11,7 @@ import {
   importCSV,
   importXML,
 } from "../controllers/productImportController.js";
+import { indexAllProducts } from "../controllers/productController.js";
 
 const router = express.Router();
 
@@ -35,5 +36,8 @@ router.delete("/:id", requireAuth, requireAdmin, deleteProduct);
 router.post("/import/csv", requireAuth, requireAdmin, importCSV);
 
 router.post("/import/xml", requireAuth, requireAdmin, importXML);
+
+// Admin route to index all products in Algolia
+router.post("/index", requireAuth, requireAdmin, indexAllProducts);
 
 export default router;
