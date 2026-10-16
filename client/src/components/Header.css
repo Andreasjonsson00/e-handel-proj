@@ -24,8 +24,12 @@
 }
 .site-header nav {
   display: flex;
+
   align-items: center;
-  gap: 8px;
+
+  justify-content: space-between;
+
+  gap: 12px;
 }
 .site-header nav a,
 .site-header button {
@@ -43,6 +47,107 @@
 }
 .site-header nav button {
   background: #17352d;
+}
+.currency-select {
+  min-height: 38px;
+  padding: 8px 13px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  background: #17352d;
+  color: #fffdfa;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.admin-dropdown {
+  position: relative;
+}
+
+.site-header .admin-dropdown-toggle {
+  background: #17352d;
+  color: #fffdfa;
+  cursor: pointer;
+}
+
+.admin-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 1000;
+
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+  padding: 6px;
+
+  border: 1px solid rgb(23 53 45 / 12%);
+  border-radius: 12px;
+  background: #fffdfa;
+  box-shadow: 0 10px 24px rgb(23 53 45 / 14%);
+}
+
+.site-header .admin-dropdown-menu a {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #36564a;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-header .admin-dropdown-menu a:hover {
+  background: #e2edda;
+}
+
+/* Valutamenyn */
+.currency-dropdown {
+  position: relative;
+}
+
+.site-header .currency-dropdown-toggle {
+  min-height: 38px;
+  padding: 8px 13px;
+  border: none;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  background: #17352d;
+  color: #fffdfa;
+  cursor: pointer;
+}
+
+.currency-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 1000;
+
+  display: flex;
+  flex-direction: column;
+  min-width: 100px;
+  padding: 6px;
+
+  border: 1px solid rgb(23 53 45 / 12%);
+  border-radius: 12px;
+  background: #fffdfa;
+  box-shadow: 0 10px 24px rgb(23 53 45 / 14%);
+}
+
+.site-header .currency-dropdown-menu button {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #36564a;
+  text-align: left;
+  cursor: pointer;
+}
+
+.site-header .currency-dropdown-menu button:hover,
+.site-header .currency-dropdown-menu button.selected {
+  background: #e2edda;
 }
 @media (max-width: 680px) {
   .site-header {
