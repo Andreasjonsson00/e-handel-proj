@@ -18,10 +18,45 @@ export async function indexAllProducts(req, res, next) {
 }
 
 export async function getProducts(req, res, next) {
-  try {
-    const result = await pool.query(`SELECT * FROM products`);
+  const page = Math.max(
+    1,
 
-    res.json(result.rows);
+    Number.parseInt(req.query.page, 10) || 1,
+  );
+
+  const pageSize = Math.min(
+    100,
+    Math.max(1, Number.parseInt(req.query.pageSize, 10) || 10),
+  );
+
+  const offset = (page - 1) * pageSize;
+
+  try {
+    const result = await pool.query(
+      `SELECT *
+      FROM products
+      ORDER BY id
+      LIMIT $1 OFFSET $2`,
+      [pageSize, offset],
+    );
+
+    const countResult = await pool.query(
+      `SELECT COUNT(*)::int AS total
+   FROM products`,
+    );
+
+    const total = countResult.rows[0].total;
+    const totalPages = Math.ceil(total / pageSize);
+
+    res.json({
+      data: result.rows,
+      meta: {
+        page,
+        pageSize,
+        total,
+        totalPages,
+      },
+    });
   } catch (err) {
     next(err);
   }
