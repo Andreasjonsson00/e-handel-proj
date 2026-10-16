@@ -15,7 +15,7 @@ const ProductCard = ({ products, addToCart, getProductName }) => {
   return (
     <>
       {products.map((product) => (
-        <article className="product-card" key={product.id}>
+        <article className="product-card" key={product.article_number}>
           <div>
             <h2>{getProductName(product)}</h2>
 
