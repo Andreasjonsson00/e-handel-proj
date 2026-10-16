@@ -4,6 +4,7 @@ import Header from "../components/Header";
 import "./Frontpage.css";
 import ProductCard from "../components/ProductCard";
 import Cart from "../components/Cart";
+import SearchBar from "../components/SearchBar";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
@@ -20,6 +21,14 @@ function Frontpage({ auth, onLogout }) {
 
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+
+  const [searchInput, setSearchInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  function handleSearch() {
+    setPage(1);
+    setSearchQuery(searchInput.trim());
+  }
 
   function addToCart(product) {
     setCart((currentCart) => {
@@ -67,10 +76,14 @@ function Frontpage({ auth, onLogout }) {
         setIsLoading(true);
         setError(null);
 
-        const response = await axios.get(
-          `${API_URL}/api/products?page=${page}&pageSize=9`,
-        );
+        const endpoint = searchQuery
+          ? `${API_URL}/api/search?q=${encodeURIComponent(searchQuery)}&page=${page}&pageSize=9`
+          : `${API_URL}/api/products?page=${page}&pageSize=9`;
+
+        const response = await axios.get(endpoint);
+
         setProducts(response.data);
+
         setTotalPages(response.data.meta.totalPages);
       } catch (err) {
         console.error(err);
@@ -86,7 +99,7 @@ function Frontpage({ auth, onLogout }) {
 
     fetchProducts();
     return () => clearTimeout(timer);
-  }, [page]);
+  }, [page, searchQuery]);
 
   return (
     <>
@@ -94,13 +107,16 @@ function Frontpage({ auth, onLogout }) {
       <main className="container">
         <section className="storefront">
           <div className="page-heading">
-            <h2>Produkter</h2>
+            <h1>Produkter</h1>
 
             <p>Välj produkter och lägg dem i varukorgen.</p>
           </div>
 
-          <div className="search-container" id="autocomplete"></div>
-
+          <SearchBar
+            searchInput={searchInput}
+            setSearchInput={setSearchInput}
+            onSearch={handleSearch}
+          />
           {error && <p>{error}</p>}
 
           {!isLoading && !error && products.length === 0 && (

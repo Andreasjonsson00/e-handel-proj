@@ -3,6 +3,7 @@ import axios from "axios";
 import { Navigate } from "react-router-dom";
 import Header from "../components/Header";
 import "./AdminProducts.css";
+import SearchBar from "../components/SearchBar";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
@@ -24,10 +25,20 @@ function AdminProducts({ auth, onLogout }) {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [isImporting, setIsImporting] = useState(false);
+  const [isIndexing, setIsIndexing] = useState(false);
   const [importResult, setImportResult] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
 
   const isEditing = editingProductId !== null;
 
+  const [searchInput, setSearchInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  function handleSearch() {
+    setPage(1);
+    setSearchQuery(searchInput.trim());
+  }
   function updateField(event) {
     const { name, value } = event.target;
 
@@ -53,6 +64,38 @@ function AdminProducts({ auth, onLogout }) {
   function resetForm() {
     setEditingProductId(null);
     setForm(emptyForm);
+  }
+
+  async function handleIndex() {
+    setError("");
+    setMessage("");
+    setIsIndexing(true);
+
+    try {
+      setIsIndexing(true);
+
+      await axios.post(
+        `${API_URL}/api/products/index`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${auth.token}`,
+          },
+        },
+      );
+
+      setMessage(`Produkter har indexerats i sökfunktionen.`);
+    } catch (err) {
+      console.error(err);
+
+      setError(
+        err.response?.data?.message ??
+          err.response?.data?.error ??
+          `Kunde inte indexera produkter.`,
+      );
+    } finally {
+      setIsIndexing(false);
+    }
   }
 
   async function handleSubmit(event) {
@@ -192,8 +235,15 @@ function AdminProducts({ auth, onLogout }) {
         setIsLoading(true);
         setError("");
 
-        const response = await axios.get(`${API_URL}/api/products`);
-        setProducts(response.data);
+        const endpoint = searchQuery
+          ? `${API_URL}/api/search?q=${encodeURIComponent(searchQuery)}&page=${page}&pageSize=9`
+          : `${API_URL}/api/products?page=${page}&pageSize=9`;
+
+        const response = await axios.get(endpoint);
+
+        setProducts(response.data.data);
+
+        setTotalPages(response.data.meta.totalPages);
       } catch (err) {
         console.error(err);
         setError("Kunde inte hämta produkter.");
@@ -205,7 +255,7 @@ function AdminProducts({ auth, onLogout }) {
 
     fetchProducts();
     return () => clearTimeout(timer);
-  }, []);
+  }, [page, searchQuery]);
 
   if (!auth || auth.user.role !== "admin") {
     return <Navigate to="/login" replace />;
@@ -227,7 +277,7 @@ function AdminProducts({ auth, onLogout }) {
             <button
               type="button"
               onClick={() => handleImport("csv")}
-              disabled={isImporting}
+              disabled={isImporting || isIndexing}
             >
               {isImporting ? "Importerar..." : "Importera CSV"}
             </button>
@@ -235,11 +285,24 @@ function AdminProducts({ auth, onLogout }) {
             <button
               type="button"
               onClick={() => handleImport("xml")}
-              disabled={isImporting}
+              disabled={isImporting || isIndexing}
             >
               {isImporting ? "Importerar..." : "Importera XML"}
             </button>
+            <button
+              type="button"
+              onClick={() => handleIndex()}
+              disabled={isImporting || isIndexing}
+            >
+              {isIndexing ? "Indexerar..." : "Indexera produkter"}
+            </button>
           </div>
+
+          <SearchBar
+            searchInput={searchInput}
+            setSearchInput={setSearchInput}
+            onSearch={handleSearch}
+          />
 
           {error && <p className="form-error">{error}</p>}
 
@@ -366,10 +429,17 @@ function AdminProducts({ auth, onLogout }) {
             ) : error ? (
               <p>{error}</p>
             ) : products.length === 0 ? (
-              <p>Det finns inga produkter i databasen ännu.</p>
+              <p>
+                {searchQuery
+                  ? "Inga produkter matchade din sökning."
+                  : "Det finns inga produkter i databasen ännu."}
+              </p>
             ) : (
               products.map((product) => (
-                <article className="admin-product-row" key={product.id}>
+                <article
+                  className="admin-product-row"
+                  key={product.article_number}
+                >
                   <img
                     src={`${product.image_url}?auto=format&fit=crop&w=300&q=75`}
                     alt={product.name}
@@ -395,6 +465,27 @@ function AdminProducts({ auth, onLogout }) {
                   </button>
                 </article>
               ))
+            )}
+            {!isLoading && !error && totalPages > 1 && (
+              <div className="pagination">
+                <button
+                  onClick={() => setPage((currentPage) => currentPage - 1)}
+                  disabled={page === 1}
+                >
+                  Föregående
+                </button>
+
+                <span>
+                  Sida {page} av {totalPages}
+                </span>
+
+                <button
+                  onClick={() => setPage((currentPage) => currentPage + 1)}
+                  disabled={page >= totalPages}
+                >
+                  Nästa
+                </button>
+              </div>
             )}
           </section>
         </section>

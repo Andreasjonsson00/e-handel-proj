@@ -17,6 +17,7 @@ export async function indexProducts(products) {
       category: product.category,
       price: product.price,
       description: product.description,
+      image_url: product.image_url
     });
   }
 
@@ -76,6 +77,7 @@ export async function searchProducts(searchText, page = 1, pageSize = 10) {
       category: hit.category,
       price: hit.price,
       description: hit.description,
+      image_url: hit.image_url
     });
   }
 
