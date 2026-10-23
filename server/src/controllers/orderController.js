@@ -35,9 +35,11 @@ export async function createOrder(req, res, next) {
 
     const productIds = orderItems.map((item) => item.productId);
     const productsResult = await client.query(
-      `SELECT id, price
-       FROM products
-       WHERE id = ANY($1::int[])`,
+      `SELECT id, price, stock
+      FROM products
+      WHERE id = ANY($1::int[])
+      FOR UPDATE`,
+
       [productIds],
     );
 
@@ -51,6 +53,21 @@ export async function createOrder(req, res, next) {
     const productsById = new Map(
       productsResult.rows.map((product) => [product.id, product]),
     );
+
+    const hasInsufficientStock = orderItems.some((item) => {
+      const product = productsById.get(item.productId);
+
+      return product.stock < item.quantity;
+    });
+
+    if (hasInsufficientStock) {
+      await client.query("ROLLBACK");
+
+      return res.status(400).json({
+        message:
+          "En eller flera produkter finns inte i tillräckligt antal i lager.",
+      });
+    }
 
     const totalPrice = orderItems.reduce((sum, item) => {
       const product = productsById.get(item.productId);
@@ -74,6 +91,19 @@ export async function createOrder(req, res, next) {
          VALUES ($1, $2, $3, $4)`,
         [order.id, item.productId, item.quantity, product.price],
       );
+
+      const stockResult = await client.query(
+        `UPDATE products
+        SET stock = stock - $1
+        WHERE id = $2 AND stock >= $1
+        RETURNING stock`,
+
+        [item.quantity, item.productId],
+      );
+
+      if (stockResult.rowCount === 0) {
+        throw new Error("Otillräckligt lagersaldo.");
+      }
     }
 
     await client.query("COMMIT");

@@ -13,6 +13,7 @@ export async function indexProducts(products) {
   for (const product of products) {
     records.push({
       objectID: product.article_number,
+      id: product.id,
       name: product.name,
       category: product.category,
       price: product.price,
