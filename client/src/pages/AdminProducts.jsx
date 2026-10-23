@@ -13,6 +13,7 @@ const emptyForm = {
   category: "",
   price: "",
   image_url: "",
+  stock: "",
 };
 
 function AdminProducts({ auth, onLogout }) {
@@ -56,6 +57,7 @@ function AdminProducts({ auth, onLogout }) {
       price: product.price ?? "",
       image_url: product.image_url ?? "",
       category: product.category ?? "",
+      stock: product.stock ?? "",
     });
     setMessage("");
     setError("");
@@ -133,12 +135,18 @@ function AdminProducts({ auth, onLogout }) {
         );
         setMessage("Produkten har uppdaterats.");
       } else {
-        const response = await axios.post(
-          `${API_URL}/api/products`,
-          payload,
-          config,
-        );
-        setProducts((currentProducts) => [...currentProducts, response.data]);
+        await axios.post(`${API_URL}/api/products`, payload, config);
+
+        const endpoint = searchQuery
+          ? `${API_URL}/api/search?q=${encodeURIComponent(searchQuery)}&page=${page}&pageSize=9`
+          : `${API_URL}/api/products?page=${page}&pageSize=9`;
+
+        const productsResponse = await axios.get(endpoint);
+
+        setProducts(productsResponse.data.data);
+
+        setTotalPages(productsResponse.data.meta.totalPages);
+
         setMessage("Produkten har lagts till.");
       }
 
@@ -209,9 +217,13 @@ function AdminProducts({ auth, onLogout }) {
 
       setMessage(`${format.toUpperCase()}-importen är klar.`);
 
-      const productsResponse = await axios.get(`${API_URL}/api/products`);
+      const productsResponse = await axios.get(
+        `${API_URL}/api/products?page=${page}&pageSize=9`,
+      );
 
-      setProducts(productsResponse.data);
+      setProducts(productsResponse.data.data);
+
+      setTotalPages(productsResponse.data.meta.totalPages);
     } catch (err) {
       console.error(err);
 
@@ -240,6 +252,7 @@ function AdminProducts({ auth, onLogout }) {
           : `${API_URL}/api/products?page=${page}&pageSize=9`;
 
         const response = await axios.get(endpoint);
+
 
         setProducts(response.data.data);
 
@@ -385,6 +398,19 @@ function AdminProducts({ auth, onLogout }) {
             </label>
 
             <label className="form-field">
+              Lagersaldo
+              <input
+                name="stock"
+                type="number"
+                min="0"
+                step="1"
+                value={form.stock}
+                onChange={updateField}
+                required
+              />
+            </label>
+
+            <label className="form-field">
               Bildlänk
               <input
                 name="image_url"
@@ -436,10 +462,7 @@ function AdminProducts({ auth, onLogout }) {
               </p>
             ) : (
               products.map((product) => (
-                <article
-                  className="admin-product-row"
-                  key={product.article_number}
-                >
+                <article className="admin-product-row" key={product.id}>
                   <img
                     src={`${product.image_url}?auto=format&fit=crop&w=300&q=75`}
                     alt={product.name}
@@ -458,11 +481,28 @@ function AdminProducts({ auth, onLogout }) {
                   </button>
 
                   <button
-                    type="button"
-                    onClick={() => handleDeleteProduct(product.id)}
-                  >
-                    Ta bort
-                  </button>
+
+  type="button"
+
+  onClick={() => {
+
+    if (product.id == null) {
+
+      console.error("Produkten saknar ID:", product);
+
+      return;
+
+    }
+
+    handleDeleteProduct(product.id);
+
+  }}
+
+>
+
+  Ta bort
+
+</button>
                 </article>
               ))
             )}

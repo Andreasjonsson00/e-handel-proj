@@ -1,19 +1,25 @@
 export function validateProductPayload(req, res, next) {
-  const { name, description, price, image_url, category } = req.body;
+  const { name, description, price, image_url, category, stock } = req.body;
   const numericPrice = Number(price);
   const trimmedName = name?.trim();
   const trimmedDescription = description?.trim();
   const trimmedImageUrl = image_url?.trim();
   const trimmedCategory = category?.trim();
+  const numericStock = Number(stock);
 
   if (
     !trimmedName ||
     !trimmedDescription ||
     !trimmedImageUrl ||
-    !Number.isFinite(numericPrice)
+    !trimmedCategory ||
+    !Number.isFinite(numericPrice) ||
+    !Number.isFinite(numericStock) ||
+    !Number.isInteger(numericStock) ||
+    numericStock < 0
   ) {
     return res.status(400).json({
-      message: "Namn, beskrivning, bildlänk och ett giltigt pris krävs.",
+      message:
+        "Namn, beskrivning, bildlänk, kategori, giltigt pris och ett giltigt lagersaldo krävs.",
     });
   }
 
@@ -27,6 +33,7 @@ export function validateProductPayload(req, res, next) {
     price: numericPrice,
     image_url: trimmedImageUrl,
     category: trimmedCategory,
+    stock: numericStock,
   };
 
   next();

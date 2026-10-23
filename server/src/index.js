@@ -6,10 +6,14 @@ import orderRoutes from "./routes/orderRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import currencyRoutes from "./routes/currencyRoutes.js";
 import searchRoutes from "./routes/searchRoutes.js";
+import stripeRoutes from "./routes/stripeRoutes.js";
+import checkoutRoutes from "./routes/checkoutRoutes.js";
 
 const app = express();
 
 app.use(cors());
+
+app.use("/api/stripe/webhook", stripeRoutes);
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -21,6 +25,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/currency", currencyRoutes);
 app.use("/api/search", searchRoutes);
+app.use("/api/checkout", checkoutRoutes);
 
 app.use((err, req, res, next) => {
   const message = err instanceof Error ? err.message : String(err);

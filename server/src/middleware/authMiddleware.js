@@ -16,6 +16,17 @@ export function requireAuth(req, res, next) {
     return res.status(401).json({ message: "Du måste vara inloggad." });
   }
 
+  if (Date.now() >= session.expiresAt) {
+    const authHeader = req.headers.authorization ?? "";
+    const token = authHeader.startsWith("Bearer ")
+      ? authHeader.slice("Bearer ".length)
+      : "";
+
+    sessions.delete(token);
+
+    return res.status(401).json({ message: "Din session har gått ut." });
+  }
+
   req.user = session.user;
   next();
 }

@@ -1,0 +1,17 @@
+.return-page-container {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 48px 0 64px;
+  gap: 38px;
+}
+
+.return-link {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #1f5a49;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 999px;
+  transition: background-color 0.3s ease;
+}

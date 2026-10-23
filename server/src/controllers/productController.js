@@ -63,17 +63,17 @@ export async function getProducts(req, res, next) {
 }
 
 export async function createProduct(req, res, next) {
-  const { name, description, price, image_url, category } = req.product;
+  const { name, description, price, image_url, category, stock } = req.product;
 
   // 1. Save first in DB
   // 2. If all is well,  index the new product in Algolia.
   let newProduct;
   try {
     const result = await pool.query(
-      `INSERT INTO products (name, description, price, image_url, category)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO products (name, description, price, image_url, category, stock)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
-      [name, description, price, image_url, category],
+      [name, description, price, image_url, category, stock],
     );
 
     newProduct = result.rows[0];
@@ -97,20 +97,21 @@ export async function updateProduct(req, res, next) {
     return res.status(400).json({ message: "Ogiltigt produkt-id." });
   }
 
-  const { name, description, price, image_url, category } = req.product;
+  const { name, description, price, image_url, category, stock } = req.product;
 
   let updatedProduct;
   try {
     const result = await pool.query(
       `UPDATE products
        SET name = $1,
-           description = $2,
-           price = $3,
-           image_url = $4,
-            category = $5
-       WHERE id = $6
+          description = $2,
+          price = $3,
+          image_url = $4,
+          category = $5,
+          stock = $6
+       WHERE id = $7
        RETURNING *`,
-      [name, description, price, image_url, category, productId],
+      [name, description, price, image_url, category, stock, productId],
     );
 
     if (result.rowCount === 0) {

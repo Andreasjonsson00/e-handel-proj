@@ -15,7 +15,6 @@ const Cart = ({
   auth,
 }) => {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const [checkoutMessage, setCheckoutMessage] = useState("");
   const navigate = useNavigate();
 
   const cartTotalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -37,7 +36,6 @@ const Cart = ({
     }).format(price);
   }
   async function handleCheckout() {
-    setCheckoutMessage("");
 
     if (!auth) {
       navigate("/login");
@@ -47,8 +45,8 @@ const Cart = ({
     try {
       setIsCheckingOut(true);
 
-      await axios.post(
-        `${API_URL}/api/orders`,
+      const response = await axios.post(
+        `${API_URL}/api/checkout/hosted`,
         {
           items: cart.map((item) => ({
             productId: item.product.id,
@@ -62,8 +60,7 @@ const Cart = ({
         },
       );
 
-      setCart([]);
-      setCheckoutMessage("Ordern är skickad! Tack för ditt köp.");
+      window.location.href = response.data.url;
     } catch (err) {
       console.error(err);
     } finally {
@@ -90,7 +87,6 @@ const Cart = ({
         )}
       </div>
 
-      {checkoutMessage && <p className="success-message">{checkoutMessage}</p>}
 
       {cart.length === 0 ? (
         <p className="empty-cart">Din varukorg är tom.</p>
