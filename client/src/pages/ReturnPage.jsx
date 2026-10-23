@@ -13,8 +13,13 @@ const ReturnPage = ({ auth, onLogout }) => {
   const [orderInfo, setOrderInfo] = useState(null);
   const [error, setError] = useState(null);
   const [products, setProducts] = useState([]);
+  const [showLoader, setShowLoader] = useState(false);
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowLoader(true);
+    }, 500);
+
     const checkPayment = async () => {
       try {
         const response = await fetch(
@@ -56,6 +61,7 @@ const ReturnPage = ({ auth, onLogout }) => {
     };
 
     checkPayment();
+    return () => clearTimeout(timer);
   }, [sessionId, auth?.token]);
 
   if (!sessionId) {
@@ -70,7 +76,7 @@ const ReturnPage = ({ auth, onLogout }) => {
     );
   }
 
-  if (status === "checking") {
+  if (status === "checking" && showLoader) {
     return (
       <main>
         <p>Kontrollerar din betalning...</p>
@@ -125,7 +131,7 @@ const ReturnPage = ({ auth, onLogout }) => {
             </ul>
           </div>
         )}
-        
+
         <Link to="/" className="return-link">
           Tillbaka till butiken
         </Link>
