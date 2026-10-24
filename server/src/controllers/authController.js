@@ -1,6 +1,5 @@
-import crypto from "node:crypto";
 import { pool } from "../db.js";
-import { sessions } from "../sessions.js";
+import jwt from "jsonwebtoken";
 
 export async function login(req, res, next) {
   const { username, password } = req.body;
@@ -21,21 +20,19 @@ export async function login(req, res, next) {
         .json({ message: "Fel användarnamn eller lösenord." });
     }
 
-    const token = crypto.randomUUID();
     const publicUser = {
       id: user.id,
       username: user.username,
       role: user.role,
     };
 
-    const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
-
-    sessions.set(token, { user: publicUser, expiresAt });
+    const token = jwt.sign(publicUser, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
     res.json({
       token,
       user: publicUser,
-      expiresAt,
     });
   } catch (err) {
     next(err);
@@ -47,7 +44,5 @@ export function getMe(req, res) {
 }
 
 export function logout(req, res) {
-  const token = req.headers.authorization.slice("Bearer ".length);
-  sessions.delete(token);
   res.status(204).send();
 }

@@ -1,34 +1,30 @@
-import { sessions } from "../sessions.js";
+import jwt from "jsonwebtoken";
 
-function getSessionFromRequest(req) {
+function getTokenFromRequest(req) {
   const authHeader = req.headers.authorization ?? "";
-  const token = authHeader.startsWith("Bearer ")
+
+  return authHeader.startsWith("Bearer ")
     ? authHeader.slice("Bearer ".length)
     : "";
-
-  return sessions.get(token);
 }
 
 export function requireAuth(req, res, next) {
-  const session = getSessionFromRequest(req);
+  const token = getTokenFromRequest(req);
 
-  if (!session) {
-    return res.status(401).json({ message: "Du måste vara inloggad." });
+  if (!token) {
+    return res.status(401).json({
+      message: "Du måste vara inloggad.",
+    });
   }
 
-  if (Date.now() >= session.expiresAt) {
-    const authHeader = req.headers.authorization ?? "";
-    const token = authHeader.startsWith("Bearer ")
-      ? authHeader.slice("Bearer ".length)
-      : "";
-
-    sessions.delete(token);
-
-    return res.status(401).json({ message: "Din session har gått ut." });
+  try {
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch {
+    return res.status(401).json({
+      message: "Du måste vara inloggad.",
+    });
   }
-
-  req.user = session.user;
-  next();
 }
 
 export function requireAdmin(req, res, next) {
