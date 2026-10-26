@@ -1,21 +1,25 @@
 import "./CartItem.css";
+import { useCurrency } from "../context/CurrencyProvider";
 
 const CartItem = ({
   cart,
   getProductName,
-  formatPrice,
   decreaseQuantity,
   addToCart,
   removeFromCart,
-  getNumericPrice,
+  cartTotalPrice,
 }) => {
+  const { currency, convertPrice } = useCurrency();
+
   return (
     <>
       {cart.map((item) => (
         <li className="cart-item" key={item.product.id}>
           <div>
             <h3>{getProductName(item.product)}</h3>
-            <p>{formatPrice(getNumericPrice(item.product))}</p>
+            <p>
+              {convertPrice(cartTotalPrice).toFixed(2)} {currency}
+            </p>
           </div>
 
           <div className="quantity-controls">
