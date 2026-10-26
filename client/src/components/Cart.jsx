@@ -102,7 +102,7 @@ const Cart = ({
               decreaseQuantity={decreaseQuantity}
               addToCart={addToCart}
               removeFromCart={removeFromCart}
-              getNumericPrice={getNumericPrice}
+              cartTotalPrice={cartTotalPrice}
             />
           </ul>
 
