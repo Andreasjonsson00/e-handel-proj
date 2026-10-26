@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import CartItem from "./CartItem";
+import { useCurrency } from "../context/CurrencyProvider";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
@@ -14,6 +15,7 @@ const Cart = ({
   setCart,
   auth,
 }) => {
+  const { currency, convertPrice } = useCurrency();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const navigate = useNavigate();
 
@@ -106,7 +108,8 @@ const Cart = ({
 
           <div className="cart-total">
             <span>Totalt </span>
-            <strong>{formatPrice(cartTotalPrice)}</strong>
+            <strong>{convertPrice(cartTotalPrice).toFixed(2)}</strong>
+            {currency}
           </div>
 
           <button
