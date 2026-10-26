@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import CartItem from "./CartItem";
 import { useCurrency } from "../context/CurrencyProvider";
+import CartItemList from "./CartItemList";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
@@ -31,12 +31,7 @@ const Cart = ({
     return Number.isFinite(price) ? price : 0;
   }
 
-  function formatPrice(price) {
-    return new Intl.NumberFormat("sv-SE", {
-      style: "currency",
-      currency: "SEK",
-    }).format(price);
-  }
+ 
   async function handleCheckout() {
 
     if (!auth) {
@@ -95,14 +90,12 @@ const Cart = ({
       ) : (
         <>
           <ul className="cart-list">
-            <CartItem
+            <CartItemList
               cart={cart}
               getProductName={getProductName}
-              formatPrice={formatPrice}
               decreaseQuantity={decreaseQuantity}
               addToCart={addToCart}
               removeFromCart={removeFromCart}
-              cartTotalPrice={cartTotalPrice}
             />
           </ul>
 

@@ -14,7 +14,7 @@ const ProductCard = ({ product, addToCart, getProductName }) => {
 
   return (
     <>
-      <article className="product-card" key={product.article_number}>
+      <article className="product-card">
         <div>
           <h2>{getProductName(product)}</h2>
 
