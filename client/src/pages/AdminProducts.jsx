@@ -12,7 +12,6 @@ const emptyForm = {
   description: "",
   category: "",
   price: "",
-  image_url: "",
   stock: "",
 };
 
@@ -36,6 +35,9 @@ function AdminProducts({ auth, onLogout }) {
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
+  const [file, setFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+
   function handleSearch() {
     setPage(1);
     setSearchQuery(searchInput.trim());
@@ -55,7 +57,6 @@ function AdminProducts({ auth, onLogout }) {
       name: product.name ?? "",
       description: product.description ?? "",
       price: product.price ?? "",
-      image_url: product.image_url ?? "",
       category: product.category ?? "",
       stock: product.stock ?? "",
     });
@@ -253,7 +254,6 @@ function AdminProducts({ auth, onLogout }) {
 
         const response = await axios.get(endpoint);
 
-
         setProducts(response.data.data);
 
         setTotalPages(response.data.meta.totalPages);
@@ -272,6 +272,105 @@ function AdminProducts({ auth, onLogout }) {
 
   if (!auth || auth.user.role !== "admin") {
     return <Navigate to="/login" replace />;
+  }
+
+  async function handleImageUpload(event) {
+    event.preventDefault();
+
+    if (!editingProductId) {
+      setError("Välj en befintlig produkt först.");
+      return;
+    }
+
+    if (!file) {
+      setError("Välj en bild först.");
+      return;
+    }
+
+    setError("");
+    setMessage("");
+    setIsUploading(true);
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/products/${editingProductId}/image`,
+        formData,
+
+        {
+          headers: {
+            Authorization: `Bearer ${auth.token}`,
+          },
+        },
+      );
+
+      setProducts((currentProducts) =>
+        currentProducts.map((product) =>
+          product.id === editingProductId
+            ? { ...product, image_url: response.data.product.image_url }
+            : product,
+        ),
+      );
+
+      setMessage("Bilden har laddats upp.");
+    } catch (err) {
+      console.error(err);
+
+      setError(
+        err.response?.data?.message ??
+          err.response?.data?.error ??
+          "Kunde inte ladda upp bilden.",
+      );
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
+  async function handleDeleteImage(productId) {
+    if (!productId) {
+      setError("Välj en befintlig produkt först.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Är du säker på att du vill ta bort produktbilden?",
+    );
+
+    if (!confirmed) return;
+
+    setError("");
+    setMessage("");
+
+    try {
+      setIsUploading(true);
+
+      await axios.delete(`${API_URL}/api/products/${productId}/image`, {
+        headers: {
+          Authorization: `Bearer ${auth.token}`,
+        },
+      });
+
+      setProducts((currentProducts) =>
+        currentProducts.map((product) =>
+          product.id === productId ? { ...product, image_url: null } : product,
+        ),
+      );
+
+      setMessage("Produktbilden har tagits bort.");
+      setFile(null);
+    } catch (err) {
+      console.error(err);
+
+      setError(
+        err.response?.data?.message ??
+          err.response?.data?.error ??
+          "Kunde inte ta bort produktbilden.",
+      );
+    } finally {
+      setIsUploading(false);
+    }
   }
 
   return (
@@ -350,100 +449,108 @@ function AdminProducts({ auth, onLogout }) {
         </div>
 
         <section className="admin-products-layout">
-          <form className="product-form" onSubmit={handleSubmit}>
-            <h2>{isEditing ? "Redigera produkt" : "Ny produkt"}</h2>
+          <div className="product-form">
+            <form onSubmit={handleSubmit}>
+              <h2>{isEditing ? "Redigera produkt" : "Ny produkt"}</h2>
 
-            <label className="form-field">
-              Namn
-              <input
-                name="name"
-                value={form.name}
-                onChange={updateField}
-                required
-              />
-            </label>
+              <label className="form-field">
+                Namn
+                <input
+                  name="name"
+                  value={form.name}
+                  onChange={updateField}
+                  required
+                />
+              </label>
 
-            <label className="form-field">
-              Beskrivning
-              <textarea
-                name="description"
-                value={form.description}
-                onChange={updateField}
-                rows="4"
-                required
-              />
-            </label>
+              <label className="form-field">
+                Beskrivning
+                <textarea
+                  name="description"
+                  value={form.description}
+                  onChange={updateField}
+                  rows="4"
+                  required
+                />
+              </label>
 
-            <label className="form-field">
-              Kategori
-              <input
-                name="category"
-                value={form.category}
-                onChange={updateField}
-                required
-              />
-            </label>
+              <label className="form-field">
+                Kategori
+                <input
+                  name="category"
+                  value={form.category}
+                  onChange={updateField}
+                  required
+                />
+              </label>
 
-            <label className="form-field">
-              Pris
-              <input
-                name="price"
-                type="number"
-                min="0"
-                step="1"
-                value={form.price}
-                onChange={updateField}
-                required
-              />
-            </label>
+              <label className="form-field">
+                Pris
+                <input
+                  name="price"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={form.price}
+                  onChange={updateField}
+                  required
+                />
+              </label>
 
-            <label className="form-field">
-              Lagersaldo
-              <input
-                name="stock"
-                type="number"
-                min="0"
-                step="1"
-                value={form.stock}
-                onChange={updateField}
-                required
-              />
-            </label>
+              <label className="form-field">
+                Lagersaldo
+                <input
+                  name="stock"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={form.stock}
+                  onChange={updateField}
+                  required
+                />
+              </label>
 
-            <label className="form-field">
-              Bildlänk
-              <input
-                name="image_url"
-                type="url"
-                value={form.image_url}
-                onChange={updateField}
-                required
-              />
-            </label>
+              {error && <p className="form-error">{error}</p>}
+              {message && <p className="success-message">{message}</p>}
 
-            {error && <p className="form-error">{error}</p>}
-            {message && <p className="success-message">{message}</p>}
-
-            <div className="form-actions">
-              <button type="submit" disabled={isSaving}>
-                {isSaving
-                  ? "Sparar..."
-                  : isEditing
-                    ? "Spara ändringar"
-                    : "Lägg till"}
-              </button>
-
-              {isEditing && (
-                <button
-                  className="secondary-button"
-                  type="button"
-                  onClick={resetForm}
-                >
-                  Avbryt
+              <div className="form-actions">
+                <button type="submit" disabled={isSaving}>
+                  {isSaving
+                    ? "Sparar..."
+                    : isEditing
+                      ? "Spara ändringar"
+                      : "Lägg till"}
                 </button>
-              )}
-            </div>
-          </form>
+
+                {isEditing && (
+                  <button
+                    className="secondary-button"
+                    type="button"
+                    onClick={resetForm}
+                  >
+                    Avbryt
+                  </button>
+                )}
+              </div>
+            </form>
+
+            <form className="image-form" onSubmit={handleImageUpload}>
+              <h3>Ladda upp produktbild</h3>
+
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(event) => {
+                  setFile(event.target.files?.[0] ?? null);
+                }}
+                required
+              />
+
+              <button type="submit" disabled={!file || isUploading}>
+                {isUploading ? "Laddar upp..." : "Ladda upp bild"}
+              </button>
+            </form>
+          </div>
 
           <section className="admin-products-list" aria-label="Produktlista">
             {isLoading ? (
@@ -481,28 +588,25 @@ function AdminProducts({ auth, onLogout }) {
                   </button>
 
                   <button
+                    type="button"
+                    onClick={() => handleDeleteImage(product.id)}
+                    disabled={isUploading || !product.image_url}
+                  >
+                    {isUploading ? "Arbetar..." : "Ta bort bild"}
+                  </button>
 
-  type="button"
-
-  onClick={() => {
-
-    if (product.id == null) {
-
-      console.error("Produkten saknar ID:", product);
-
-      return;
-
-    }
-
-    handleDeleteProduct(product.id);
-
-  }}
-
->
-
-  Ta bort
-
-</button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (product.id == null) {
+                        console.error("Produkten saknar ID:", product);
+                        return;
+                      }
+                      handleDeleteProduct(product.id);
+                    }}
+                  >
+                    Ta bort
+                  </button>
                 </article>
               ))
             )}

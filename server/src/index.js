@@ -1,6 +1,7 @@
 import express from "express";
 import "dotenv/config";
 import cors from "cors";
+import errorHandler from "./middleware/errorHandler.js";
 import authRoutes from "./routes/authRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
@@ -27,15 +28,7 @@ app.use("/api/currency", currencyRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/checkout", checkoutRoutes);
 
-app.use((err, req, res, next) => {
-  const message = err instanceof Error ? err.message : String(err);
-
-  console.error(`${req.method} ${req.originalUrl} failed: ${message}`);
-
-  res.status(500).json({
-    error: "Something went wrong on the server",
-  });
-});
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

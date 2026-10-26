@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Header from "../components/Header";
 import "./Frontpage.css";
-import ProductCard from "../components/ProductCard";
+import ProductList from "../components/ProductList";
 import Cart from "../components/Cart";
 import SearchBar from "../components/SearchBar";
 
@@ -135,8 +135,8 @@ function Frontpage({ auth, onLogout }) {
             ) : products.length === 0 ? (
               <p>Det finns inga produkter i databasen ännu.</p>
             ) : (
-              <ProductCard
-                products={products.data}
+              <ProductList
+                products={products}
                 addToCart={addToCart}
                 getProductName={getProductName}
               />

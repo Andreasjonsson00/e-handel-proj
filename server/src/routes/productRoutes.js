@@ -12,10 +12,13 @@ import {
   importXML,
 } from "../controllers/productImportController.js";
 import { indexAllProducts } from "../controllers/productController.js";
+import { receiveImage } from "../middleware/receiveImage.js";
+import { uploadProductImage, deleteProductImage } from "../controllers/productController.js";
 
 const router = express.Router();
 
 router.get("/", getProducts);
+
 router.post(
   "/",
   requireAuth,
@@ -23,6 +26,7 @@ router.post(
   validateProductPayload,
   createProduct,
 );
+
 router.put(
   "/:id",
   requireAuth,
@@ -32,6 +36,22 @@ router.put(
 );
 
 router.delete("/:id", requireAuth, requireAdmin, deleteProduct);
+
+router.post(
+  "/:id/image",
+  requireAuth,
+  requireAdmin,
+  receiveImage,
+  uploadProductImage,
+);
+
+router.delete(
+  "/:id/image",
+  requireAuth,
+  requireAdmin,
+  deleteProductImage,
+);
+
 
 router.post("/import/csv", requireAuth, requireAdmin, importCSV);
 
