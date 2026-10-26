@@ -4,6 +4,11 @@ import {
   removeProducts,
 } from "../integrations/searchAdapter.js";
 
+import {
+  uploadProductImage as storeProductImage,
+  removeProductImage as deleteStoredProductImage,
+} from "../integrations/storageAdapter.js";
+
 /* --- INDEX ALL: POST /api/admin/search/index --- */
 // Sends ALL products to Algolia. Needed the first time, and when the index has fallen behind the DB.
 export async function indexAllProducts(req, res, next) {
@@ -161,5 +166,148 @@ export async function deleteProduct(req, res, next) {
   } catch (err) {
     console.warn("Could not index the deleted product to Algolia:", err);
     res.status(201).json({ deletedProduct, searchIndexed: false });
+  }
+}
+
+export async function uploadProductImage(req, res, next) {
+  const productId = Number(req.params.id);
+
+  if (!Number.isInteger(productId) || productId <= 0) {
+    return res.status(400).json({ message: "Ogiltigt produkt-id." });
+  }
+
+  if (!req.file) {
+    return res.status(400).json({ message: "Ingen bild har valts." });
+  }
+
+  if (!["image/jpeg", "image/png"].includes(req.file.mimetype)) {
+    return res.status(400).json({ message: "Endast JPEG och PNG tillåts." });
+  }
+
+  let uploadedImage;
+
+  try {
+    const productResult = await pool.query(
+      `SELECT id, article_number, image_path
+       FROM products
+       WHERE id = $1`,
+      [productId],
+    );
+
+    if (productResult.rowCount === 0) {
+      return res.status(404).json({ message: "Produkten hittades inte." });
+    }
+
+    const product = productResult.rows[0];
+
+    if (!product.article_number) {
+      return res.status(400).json({
+        message: "Produkten saknar artikelnummer.",
+      });
+    }
+
+    uploadedImage = await storeProductImage(product.article_number, {
+      buffer: req.file.buffer,
+      mimeType: req.file.mimetype,
+    });
+
+    const updateResult = await pool.query(
+      `UPDATE products
+       SET image_path = $1,
+           image_url = $2
+       WHERE id = $3
+       RETURNING *`,
+      [uploadedImage.path, uploadedImage.url, productId],
+    );
+
+    const updatedProduct = updateResult.rows[0];
+
+    try {
+      await indexProducts([updatedProduct]);
+    } catch (err) {
+      console.warn("Could not index the product image update to Algolia:", err);
+    }
+
+    if (product.image_path) {
+      try {
+        await deleteStoredProductImage(product.image_path);
+      } catch (err) {
+        console.warn("Could not delete the old product image:", err);
+      }
+    }
+
+    return res.status(200).json({
+      message: "Produktbilden har laddats upp.",
+      product: updatedProduct,
+      image: uploadedImage,
+    });
+  } catch (err) {
+    if (uploadedImage?.path) {
+      try {
+        await deleteStoredProductImage(uploadedImage.path);
+      } catch (cleanupError) {
+        console.warn("Could not clean up the uploaded image:", cleanupError);
+      }
+    }
+
+    return next(err);
+  }
+}
+
+export async function deleteProductImage(req, res, next) {
+  const productId = Number(req.params.id);
+
+  if (!Number.isInteger(productId) || productId <= 0) {
+    return res.status(400).json({ message: "Ogiltigt produkt-id." });
+  }
+
+  try {
+    const productResult = await pool.query(
+      `SELECT id, image_path
+       FROM products
+       WHERE id = $1`,
+      [productId],
+    );
+
+    if (productResult.rowCount === 0) {
+      return res.status(404).json({ message: "Produkten hittades inte." });
+    }
+
+    const product = productResult.rows[0];
+
+    if (!product.image_path) {
+      return res.status(404).json({
+        message: "Produkten har ingen bild.",
+      });
+    }
+
+    await deleteStoredProductImage(product.image_path);
+
+    const updateResult = await pool.query(
+      `UPDATE products
+       SET image_path = NULL,
+           image_url = NULL
+       WHERE id = $1
+       RETURNING *`,
+      [productId],
+    );
+
+    const updatedProduct = updateResult.rows[0];
+
+    try {
+      await indexProducts([updatedProduct]);
+    } catch (err) {
+      console.warn(
+        "Could not index the product image deletion to Algolia:",
+        err,
+      );
+    }
+
+    return res.status(200).json({
+      message: "Produktbilden har tagits bort.",
+      product: updatedProduct,
+    });
+  } catch (err) {
+    return next(err);
   }
 }
