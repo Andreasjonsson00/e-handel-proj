@@ -26,6 +26,8 @@ const Cart = z.object({
       }),
     )
     .min(1),
+  shippingMethod: z.enum(["pickup", "home_delivery"]),
+  postalCode: z.string().trim().min(3).max(10),
 });
 
 async function createOrder(cart, userId) {
@@ -69,18 +71,45 @@ async function createOrder(cart, userId) {
       };
     });
 
-    // 5. Beräkna totalpriset från databasens priser
-    const totalPrice = items.reduce(
+    // 5. Beräkna produktbeloppet från databasens priser.
+    const subtotal = items.reduce(
       (total, item) => total + item.price * item.quantity,
       0,
     );
 
-    // 6. Skapa ordern och hämta dess genererade ID
+    // 6. Beräkna frakten på servern.
+    const freeShippingThreshold = 500;
+
+    let shippingCost = 0;
+
+    if (subtotal < freeShippingThreshold) {
+      shippingCost = cart.shippingMethod === "pickup" ? 59 : 99;
+    }
+
+    const totalPrice = subtotal + shippingCost;
+
+    // 7. Skapa ordern och spara fraktinformationen.
     const orderResult = await client.query(
-      `INSERT INTO orders (user_id, total_price, status)
-       VALUES ($1, $2, $3)
-       RETURNING id`,
-      [userId, totalPrice, "pending"],
+      `INSERT INTO orders (
+        user_id,
+        subtotal,
+        shipping_method,
+        shipping_cost,
+        shipping_postal_code,
+        total_price,
+        status
+  )
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING id`,
+      [
+        userId,
+        subtotal,
+        cart.shippingMethod,
+        shippingCost,
+        cart.postalCode,
+        totalPrice,
+        "pending",
+      ],
     );
 
     const orderId = orderResult.rows[0].id;
@@ -98,7 +127,15 @@ async function createOrder(cart, userId) {
     // 8. Bekräfta transaktionen
     await client.query("COMMIT");
 
-    return { orderId, items, totalPrice };
+    return {
+      orderId,
+      items,
+      subtotal,
+      shippingCost,
+      shippingMethod: cart.shippingMethod,
+      postalCode: cart.postalCode,
+      totalPrice,
+    };
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;
@@ -126,7 +163,12 @@ router.post("/hosted", requireAuth, async (req, res, next) => {
     order = await createOrder(cart.data, req.user.id);
 
     // 3. Skapa en Stripe Checkout-session
-    const checkout = await createHostedCheckout(order.orderId, order.items);
+    const checkout = await createHostedCheckout(
+      order.orderId,
+      order.items,
+      order.shippingCost,
+      order.shippingMethod,
+    );
 
     // 4. Spara Stripe-sessionens ID på ordern
     await pool.query(

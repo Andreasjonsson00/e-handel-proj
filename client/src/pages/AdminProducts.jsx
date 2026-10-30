@@ -376,7 +376,7 @@ function AdminProducts({ auth, onLogout }) {
   return (
     <>
       <Header auth={auth} onLogout={onLogout} />
-      <main className="admin-products-page">
+      <main className="admin-products-page-container">
         <div className="page-heading">
           <h1>Produkter</h1>
 
