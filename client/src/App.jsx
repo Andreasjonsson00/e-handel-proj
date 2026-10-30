@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Frontpage from "./pages/Frontpage";
 import Login from "./pages/Login";
 import Orders from "./pages/Orders";
@@ -8,7 +8,15 @@ import ReturnPage from "./pages/ReturnPage";
 import CheckoutPage from "./pages/CheckoutPage";
 
 function App() {
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(() => {
+    const savedCart = localStorage.getItem("cart");
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
+
   const [auth, setAuth] = useState(() => {
     const savedAuth = localStorage.getItem("auth");
     return savedAuth ? JSON.parse(savedAuth) : null;
@@ -72,6 +80,10 @@ function App() {
     return Number.isFinite(price) ? price : 0;
   }
 
+  function getProductName(product) {
+    return product.name ?? "Namnlös produkt";
+  }
+
   return (
     <Routes>
       <Route
@@ -87,6 +99,7 @@ function App() {
             removeFromCart={removeFromCart}
             cartTotalQuantity={cartTotalQuantity}
             cartTotalPrice={cartTotalPrice}
+            getProductName={getProductName}
           />
         }
       />
@@ -113,9 +126,15 @@ function App() {
         element={
           <CheckoutPage
             auth={auth}
-            cart={cart}
             onLogout={handleLogout}
+            cart={cart}
+            setCart={setCart}
+            addToCart={addToCart}
+            decreaseQuantity={decreaseQuantity}
+            removeFromCart={removeFromCart}
+            cartTotalQuantity={cartTotalQuantity}
             cartTotalPrice={cartTotalPrice}
+            getProductName={getProductName}
           />
         }
       />
