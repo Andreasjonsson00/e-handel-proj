@@ -39,7 +39,7 @@ function CheckoutPage({
     );
 
   const shippingCost =
-    subtotal > 500 ? 0 : shippingMethod === "pickup" ? 59 : 99;
+    subtotal >= 500 ? 0 : shippingMethod === "pickup" ? 59 : 99;
 
   async function fetchServicePoints() {
     setLoadingPoints(true);
@@ -173,9 +173,9 @@ function CheckoutPage({
                   Hämta hos PostNord-ombud{" "}
                   <p>
                     Frakt:{" "}
-                    {shippingCost === 0
+                    {subtotal > 500
                       ? "Gratis"
-                      : `${convertPrice(shippingCost).toFixed(2)} ${currency}`}
+                      : `${convertPrice(59).toFixed(2)} ${currency}`}
                   </p>
                 </span>
               </label>
@@ -194,9 +194,9 @@ function CheckoutPage({
                   Hemleverans{" "}
                   <p>
                     Frakt:{" "}
-                    {shippingCost === 0
+                    {subtotal > 500
                       ? "Gratis"
-                      : `${convertPrice(shippingCost).toFixed(2)} ${currency}`}
+                      : `${convertPrice(99).toFixed(2)} ${currency}`}
                   </p>
                 </span>
               </label>
@@ -218,18 +218,20 @@ function CheckoutPage({
                     <legend>Välj ombud</legend>
 
                     {servicePoints.map((point) => (
-                      <label key={point.id}>
+                      <label key={point.id} className="service-point-option">
                         <input
+                          className="service-point-radio"
                           type="radio"
                           name="servicePoint"
                           value={point.id}
                           checked={selectedServicePoint === point.id}
                           onChange={() => setSelectedServicePoint(point.id)}
                         />
-
-                        <strong>{point.name}</strong>
-                        {" – "}
-                        {point.address}
+                        <div className="service-point-info">
+                          <strong>{point.name}</strong>
+                          <br />
+                          {point.address}
+                        </div>
                       </label>
                     ))}
                   </fieldset>
@@ -249,7 +251,7 @@ function CheckoutPage({
               <div key={item.product.id}>
                 <span>{item.product.name}</span>
                 {"  "}
-                <span>{item.quantity}st</span>
+                <span> x {item.quantity} st</span>
               </div>
             ))}
           </section>
@@ -260,7 +262,10 @@ function CheckoutPage({
             </p>
 
             <p>
-              Frakt: {convertPrice(shippingCost).toFixed(2)} {currency}
+              Frakt:{" "}
+              {shippingCost === 0
+                ? "Gratis"
+                : `${convertPrice(shippingCost).toFixed(2)} ${currency}`}
             </p>
 
             <p>
