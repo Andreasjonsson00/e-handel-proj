@@ -8,9 +8,7 @@ import SearchBar from "../components/SearchBar";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
-function getProductName(product) {
-  return product.name ?? "Namnlös produkt";
-}
+
 
 function Frontpage({
   auth,
@@ -21,6 +19,7 @@ function Frontpage({
   decreaseQuantity,
   removeFromCart,
   cartTotalPrice,
+  getProductName,
 }) {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

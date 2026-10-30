@@ -4,10 +4,21 @@ import axios from "axios";
 import Header from "../components/Header";
 import "./CheckoutPage.css";
 import { useCurrency } from "../context/CurrencyProvider";
+import Cart from "../components/Cart";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
-function CheckoutPage({ cart, auth, onLogout, cartTotalPrice }) {
+function CheckoutPage({
+  cart,
+  setCart,
+  auth,
+  onLogout,
+  cartTotalPrice,
+  addToCart,
+  decreaseQuantity,
+  removeFromCart,
+  getProductName,
+}) {
   const navigate = useNavigate();
 
   const [shippingMethod, setShippingMethod] = useState("pickup");
@@ -19,6 +30,16 @@ function CheckoutPage({ cart, auth, onLogout, cartTotalPrice }) {
   const [error, setError] = useState("");
 
   const { currency, convertPrice } = useCurrency();
+
+  const subtotal =
+    cartTotalPrice ??
+    cart.reduce(
+      (total, item) => total + Number(item.product.price) * item.quantity,
+      0,
+    );
+
+  const shippingCost =
+    subtotal > 500 ? 0 : shippingMethod === "pickup" ? 59 : 99;
 
   async function fetchServicePoints() {
     setLoadingPoints(true);
@@ -113,9 +134,8 @@ function CheckoutPage({ cart, auth, onLogout, cartTotalPrice }) {
     <>
       <Header auth={auth} onLogout={onLogout} />
       <main className="checkout-page-container">
-        <h1 className="checkout-page-heading">Kassan</h1>
-
-        <form onSubmit={handleCheckout}>
+        <form className="checkout-form" onSubmit={handleCheckout}>
+          <h1 className="checkout-page-heading">Kassan</h1>
           <section>
             <h2 className="checkout-section-heading">Leverans</h2>
 
@@ -140,26 +160,45 @@ function CheckoutPage({ cart, auth, onLogout, cartTotalPrice }) {
             <fieldset>
               <legend>Välj fraktsätt</legend>
 
-              <label>
+              <label className="shipping-method-option">
                 <input
+                  className="shipping-method-radio"
                   type="radio"
                   name="shippingMethod"
                   value="pickup"
                   checked={shippingMethod === "pickup"}
                   onChange={() => setShippingMethod("pickup")}
                 />
-                Hämta hos PostNord-ombud – 59 kr
+                <span>
+                  Hämta hos PostNord-ombud{" "}
+                  <p>
+                    Frakt:{" "}
+                    {shippingCost === 0
+                      ? "Gratis"
+                      : `${convertPrice(shippingCost).toFixed(2)} ${currency}`}
+                  </p>
+                </span>
               </label>
 
-              <label>
+              <label className="shipping-method-option">
                 <input
+                  className="shipping-method-radio"
                   type="radio"
                   name="shippingMethod"
                   value="home_delivery"
                   checked={shippingMethod === "home_delivery"}
                   onChange={() => setShippingMethod("home_delivery")}
                 />
-                Hemleverans – 99 kr
+
+                <span>
+                  Hemleverans{" "}
+                  <p>
+                    Frakt:{" "}
+                    {shippingCost === 0
+                      ? "Gratis"
+                      : `${convertPrice(shippingCost).toFixed(2)} ${currency}`}
+                  </p>
+                </span>
               </label>
             </fieldset>
 
@@ -213,11 +252,24 @@ function CheckoutPage({ cart, auth, onLogout, cartTotalPrice }) {
                 <span>{item.quantity}st</span>
               </div>
             ))}
-            <span>
-              <strong>{convertPrice(cartTotalPrice).toFixed(2)}</strong>{" "}
-              {currency}
-            </span>
           </section>
+
+          <div className="checkout-totals">
+            <p>
+              Delsumma: {convertPrice(subtotal).toFixed(2)} {currency}
+            </p>
+
+            <p>
+              Frakt: {convertPrice(shippingCost).toFixed(2)} {currency}
+            </p>
+
+            <p>
+              <strong>
+                Totalt: {convertPrice(subtotal + shippingCost).toFixed(2)}{" "}
+                {currency}
+              </strong>
+            </p>
+          </div>
 
           {error && <p role="alert">{error}</p>}
 
@@ -232,6 +284,18 @@ function CheckoutPage({ cart, auth, onLogout, cartTotalPrice }) {
             {isCheckingOut ? "Skickar vidare..." : "Fortsätt till betalning"}
           </button>
         </form>
+
+        <Cart
+          className="checkout-cart"
+          cart={cart}
+          setCart={setCart}
+          getProductName={getProductName}
+          decreaseQuantity={decreaseQuantity}
+          addToCart={addToCart}
+          removeFromCart={removeFromCart}
+          auth={auth}
+          cartTotalPrice={cartTotalPrice}
+        />
       </main>
     </>
   );

@@ -1,21 +1,45 @@
 .checkout-page-container {
   width: min(1180px, calc(100% - 40px));
   margin: 0 auto;
-  padding: 48px 0 64px;
-  gap: 38px;
+  padding: 32px 0 64px;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  grid-template-areas: "form cart";
+  align-items: start;
+  gap: 32px;
 }
 
-.checkout-page-heading {
-  margin: 0 0 20px;
+.checkout-form {
+  grid-area: form;
+  min-width: 0;
+  margin: 0;
 }
 
-.checkout-section-heading {
-  margin: 0 0 20px;
+.checkout-page-heading,
+.checkout-page-heading{
+  margin: 0 0 24px;
+  font-family: "Playfair Display", Georgia, serif;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+}
+
+.checkout-page-heading{
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+}
+.checkout-page-heading{
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.checkout-cart {
+  grid-area: cart;
+  min-width: 0;
+  margin-top: 32px;
 }
 
 fieldset {
-padding: 20px;
-margin-top: 20px;
+  padding: 20px;
+  margin-top: 20px;
 }
 
 .fetch-points-button {
@@ -34,4 +58,29 @@ margin-top: 20px;
   padding: 0 15px;
   font-size: 0.88rem;
   margin: 10px 0;
+}
+
+.checkout-totals {
+  margin-top: 20px;
+}
+
+.shipping-method-option {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  align-items: start;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.shipping-method-radio {
+  margin: 4px 0 0;
+}
+
+@media (max-width: 760px) {
+  .checkout-page-container {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "form"
+      "cart";
+  }
 }
