@@ -1,21 +1,14 @@
 import express from "express";
-import { z } from "zod";
 import { findServicePoints } from "../integrations/shippingAdapter.js";
+import { postalCodeSchema } from "../schemas/postalCodeSchema.js";
 
 const router = express.Router();
 
 // Validera postnumret från klienten
-const PostalCodeSchema = z
-  .string()
-  .trim()
-  .regex(/^\d{5}$/, {
-    message: "Postnumret måste bestå av fem siffror.",
-  });
-
 
 // GET /api/shipping/service-points?postalCode=13230
 router.get("/service-points", async (req, res) => {
-  const result = PostalCodeSchema.safeParse(req.query.postalCode);
+  const result = postalCodeSchema.safeParse(req.query.postalCode);
 
   if (!result.success) {
     return res.status(400).json({

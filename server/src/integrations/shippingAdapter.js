@@ -1,12 +1,7 @@
-// Adapter for the carrier (PostNord). The ONLY file that knows PostNord's key, URL and answer.
-//
-// TIMEOUT AND ERRORS – the common requirement in Labb 5:
-//   - The request gives up after 5 s, and a status that isn't 2xx or an unexpected answer → we throw
-//   - The routes catch it and answer 502. The customer can still order with home delivery.
-
-import { z } from "zod";
+import { postNordAnswerSchema } from "../schemas/shippingSchema.js";
 
 const API_KEY = process.env.POSTNORD_API_KEY ?? "";
+
 // The sandbox. In production: https://api2.postnord.com/...
 const URL =
   "https://atapi2.postnord.com/rest/businesslocation/v5/servicepoints/nearest/byaddress";
@@ -40,22 +35,6 @@ if (!API_KEY) {
 
 // The part of PostNord's answer we use – PostNord sends a lot more per service point.
 // Zod checks it: if the answer isn't what we expect, we get a clear error here instead of undefined in React.
-const PostNordAnswer = z.object({
-  servicePointInformationResponse: z.object({
-    servicePoints: z.array(
-      z.object({
-        servicePointId: z.string(),
-        name: z.string(),
-        visitingAddress: z.object({
-          streetName: z.string(),
-          streetNumber: z.string().optional(),
-          city: z.string(),
-          postalCode: z.string(),
-        }),
-      }),
-    ),
-  }),
-});
 
 /* --- The 5 service points nearest a postal code --- */
 export async function findServicePoints(postalCode) {
@@ -82,7 +61,7 @@ export async function findServicePoints(postalCode) {
   // }
 
   // The walkthrough reads the answer WITHOUT validating it – any = TypeScript doesn't know its shape.
-  const result = PostNordAnswer.safeParse(await response.json());
+  const result = postNordAnswerSchema.safeParse(await response.json());
 
   if (!result.success) {
     throw new Error(
