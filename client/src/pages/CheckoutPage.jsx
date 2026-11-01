@@ -167,7 +167,7 @@ function CheckoutPage({
           <section>
             <h2 className="checkout-section-heading">Leverans</h2>
 
-            <label htmlFor="postalCode">Sök ombud efter postnummer</label>
+            <label htmlFor="postalCode">Sök efter ombud med ditt postnummer.</label>
             <input
               className="postal-code-input"
               id="postalCode"
@@ -272,11 +272,7 @@ function CheckoutPage({
                       </label>
                     ))}
                   </fieldset>
-                )}
-
-                {servicePoints.length === 0 && !loadingPoints && (
-                  <p>Sök efter ombud med ditt postnummer.</p>
-                )}
+                )}             
               </div>
             )}
           </section>
