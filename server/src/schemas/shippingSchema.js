@@ -16,3 +16,27 @@ export const postNordAnswerSchema = z.object({
     ),
   }),
 });
+
+export const postNordTransitTimeSchema = z.array(
+  z.object({
+    isBookable: z.boolean(),
+    isSupported: z.boolean(),
+    service: z.object({
+      basicServiceCode: z.string(),
+      name: z.string(),
+    }),
+    // Unsupported additional services only contain service + status, without ETA.
+    estimatedTimeOfArrival: z
+      .object({
+        dateOfDeparture: z.string(),
+        timeOfArrival: z.string(),
+        timeOfDeparture: z.string(),
+      })
+      .optional(),
+  }),
+);
+
+export const transitTimeQuerySchema = z.object({
+  postalCode: z.string().trim().regex(/^\d{5}$/),
+  shippingMethod: z.enum(["pickup", "home_delivery"]),
+});

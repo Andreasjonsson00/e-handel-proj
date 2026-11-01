@@ -1,6 +1,10 @@
 import express from "express";
-import { findServicePoints } from "../integrations/shippingAdapter.js";
+import {
+  calculateTransitTime,
+  findServicePoints,
+} from "../integrations/shippingAdapter.js";
 import { postalCodeSchema } from "../schemas/postalCodeSchema.js";
+import { transitTimeQuerySchema } from "../schemas/shippingSchema.js";
 
 const router = express.Router();
 
@@ -28,6 +32,29 @@ router.get("/service-points", async (req, res) => {
 
     return res.status(502).json({
       message: "Det gick inte att hämta PostNord-ombud. Försök igen senare.",
+    });
+  }
+});
+
+// GET /api/shipping/transit-time?postalCode=13230&shippingMethod=pickup
+router.get("/transit-time", async (req, res) => {
+  const result = transitTimeQuerySchema.safeParse(req.query);
+
+  if (!result.success) {
+    return res.status(400).json({
+      message: "Ogiltiga uppgifter för leveranstidsberäkning.",
+      errors: result.error.flatten(),
+    });
+  }
+
+  try {
+    return res.status(200).json({
+      data: await calculateTransitTime(result.data),
+    });
+  } catch (error) {
+    console.error("[SHIPPING] Kunde inte beräkna leveranstid:", error.message);
+    return res.status(error.message.includes("not configured") ? 503 : 502).json({
+      message: "Det gick inte att beräkna leveranstiden just nu.",
     });
   }
 });

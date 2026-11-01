@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Header from "../components/Header";
@@ -26,6 +26,8 @@ function CheckoutPage({
   const [servicePoints, setServicePoints] = useState([]);
   const [selectedServicePoint, setSelectedServicePoint] = useState("");
   const [loadingPoints, setLoadingPoints] = useState(false);
+  const [transitTime, setTransitTime] = useState(null);
+  const [loadingTransitTime, setLoadingTransitTime] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [error, setError] = useState("");
 
@@ -40,6 +42,32 @@ function CheckoutPage({
 
   const shippingCost =
     subtotal >= 500 ? 0 : shippingMethod === "pickup" ? 59 : 99;
+
+  useEffect(() => {
+    const normalizedPostalCode = postalCode.trim();
+    if (!/^\d{5}$/.test(normalizedPostalCode)) return undefined;
+
+    const controller = new AbortController();
+    const timeout = window.setTimeout(async () => {
+      try {
+        setLoadingTransitTime(true);
+        const response = await axios.get(`${API_URL}/api/shipping/transit-time`, {
+          params: { postalCode: normalizedPostalCode, shippingMethod },
+          signal: controller.signal,
+        });
+        setTransitTime(response.data.data);
+      } catch (err) {
+        if (err.code !== "ERR_CANCELED") setTransitTime(null);
+      } finally {
+        if (!controller.signal.aborted) setLoadingTransitTime(false);
+      }
+    }, 400);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timeout);
+    };
+  }, [postalCode, shippingMethod]);
 
   async function fetchServicePoints() {
     setLoadingPoints(true);
@@ -152,10 +180,19 @@ function CheckoutPage({
                 setPostalCode(event.target.value);
                 setServicePoints([]);
                 setSelectedServicePoint("");
+                setTransitTime(null);
+                setLoadingTransitTime(false);
               }}
               placeholder="Exempelvis 13230"
               required
             />
+
+            {loadingTransitTime && <p>Beräknar leveranstid...</p>}
+            {!loadingTransitTime && transitTime && (
+              <p>
+                Beräknad leverans: {transitTime.deliveryDate} ({transitTime.transitDays} vardag{transitTime.transitDays === 1 ? "" : "ar"})
+              </p>
+            )}
 
             <fieldset>
               <legend>Välj fraktsätt</legend>
