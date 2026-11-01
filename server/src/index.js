@@ -9,6 +9,7 @@ import currencyRoutes from "./routes/currencyRoutes.js";
 import searchRoutes from "./routes/searchRoutes.js";
 import stripeRoutes from "./routes/stripeRoutes.js";
 import checkoutRoutes from "./routes/checkoutRoutes.js";
+import shippingRoutes from "./routes/shippingRoutes.js";
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/currency", currencyRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/checkout", checkoutRoutes);
+app.use("/api/shipping", shippingRoutes);
 
 app.use(errorHandler);
 

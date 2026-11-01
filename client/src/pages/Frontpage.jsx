@@ -8,13 +8,20 @@ import SearchBar from "../components/SearchBar";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
-function getProductName(product) {
-  return product.name ?? "Namnlös produkt";
-}
 
-function Frontpage({ auth, onLogout }) {
+
+function Frontpage({
+  auth,
+  onLogout,
+  cart,
+  setCart,
+  addToCart,
+  decreaseQuantity,
+  removeFromCart,
+  cartTotalPrice,
+  getProductName,
+}) {
   const [products, setProducts] = useState([]);
-  const [cart, setCart] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [showLoader, setShowLoader] = useState(false);
@@ -28,42 +35,6 @@ function Frontpage({ auth, onLogout }) {
   function handleSearch() {
     setPage(1);
     setSearchQuery(searchInput.trim());
-  }
-
-  function addToCart(product) {
-    setCart((currentCart) => {
-      const existingItem = currentCart.find(
-        (item) => item.product.id === product.id,
-      );
-
-      if (existingItem) {
-        return currentCart.map((item) =>
-          item.product.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item,
-        );
-      }
-
-      return [...currentCart, { product, quantity: 1 }];
-    });
-  }
-
-  function decreaseQuantity(productId) {
-    setCart((currentCart) =>
-      currentCart
-        .map((item) =>
-          item.product.id === productId
-            ? { ...item, quantity: item.quantity - 1 }
-            : item,
-        )
-        .filter((item) => item.quantity > 0),
-    );
-  }
-
-  function removeFromCart(productId) {
-    setCart((currentCart) =>
-      currentCart.filter((item) => item.product.id !== productId),
-    );
   }
 
   useEffect(() => {
@@ -172,6 +143,7 @@ function Frontpage({ auth, onLogout }) {
           addToCart={addToCart}
           removeFromCart={removeFromCart}
           auth={auth}
+          cartTotalPrice={cartTotalPrice}
         />
       </main>
     </>

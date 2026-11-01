@@ -39,7 +39,12 @@ if (!SECRET_KEY) {
 const stripe = new Stripe(SECRET_KEY, { timeout: 10_000 });
 
 /* --- 1. HOSTED: the customer pays on Stripe's page --- */
-export async function createHostedCheckout(orderId, items) {
+export async function createHostedCheckout(
+  orderId,
+  items,
+  shippingCost = 0,
+  shippingMethod = "",
+) {
   const lineItems = items.map((item) => ({
     quantity: item.quantity,
     price_data: {
@@ -50,6 +55,23 @@ export async function createHostedCheckout(orderId, items) {
       },
     },
   }));
+
+  // Lägg till frakten som en separat rad i Stripe Checkout.
+  if (shippingCost > 0) {
+    lineItems.push({
+      quantity: 1,
+      price_data: {
+        currency: "sek",
+        unit_amount: Math.round(Number(shippingCost) * 100),
+        product_data: {
+          name:
+            shippingMethod === "home_delivery"
+              ? "Frakt – hemleverans"
+              : "Frakt – ombud",
+        },
+      },
+    });
+  }
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",

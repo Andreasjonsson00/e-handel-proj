@@ -1,10 +1,6 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useCurrency } from "../context/CurrencyProvider";
 import CartItemList from "./CartItemList";
-
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
 const Cart = ({
   cart,
@@ -14,59 +10,16 @@ const Cart = ({
   removeFromCart,
   setCart,
   auth,
+  cartTotalPrice,
+  cartTotalQuantity,
+  className = "",
 }) => {
   const { currency, convertPrice } = useCurrency();
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const navigate = useNavigate();
-
-  const cartTotalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
-
-  const cartTotalPrice = cart.reduce(
-    (sum, item) => sum + getNumericPrice(item.product) * item.quantity,
-    0,
-  );
-
-  function getNumericPrice(product) {
-    const price = Number(product.price);
-    return Number.isFinite(price) ? price : 0;
-  }
-
- 
-  async function handleCheckout() {
-
-    if (!auth) {
-      navigate("/login");
-      return;
-    }
-
-    try {
-      setIsCheckingOut(true);
-
-      const response = await axios.post(
-        `${API_URL}/api/checkout/hosted`,
-        {
-          items: cart.map((item) => ({
-            productId: item.product.id,
-            quantity: item.quantity,
-          })),
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${auth.token}`,
-          },
-        },
-      );
-
-      window.location.href = response.data.url;
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsCheckingOut(false);
-    }
-  }
+  const location = useLocation();
 
   return (
-    <aside className="cart" aria-label="Varukorg">
+    <aside className={`cart ${className}`} aria-label="Varukorg">
       <div className="cart-header">
         <div>
           <p>Varukorg</p>
@@ -83,7 +36,6 @@ const Cart = ({
           </button>
         )}
       </div>
-
 
       {cart.length === 0 ? (
         <p className="empty-cart">Din varukorg är tom.</p>
@@ -105,14 +57,23 @@ const Cart = ({
             {currency}
           </div>
 
-          <button
-            className="checkout-button"
-            type="button"
-            disabled={isCheckingOut}
-            onClick={handleCheckout}
-          >
-            {isCheckingOut ? "Skickar order..." : "Gå till kassan"}
-          </button>
+          {location.pathname !== "/checkout" && (
+            <button
+              className="checkout-button"
+              type="button"
+              onClick={() => {
+                if (!auth) {
+                  navigate("/login");
+
+                  return;
+                }
+
+                navigate("/checkout");
+              }}
+            >
+              Gå till kassan
+            </button>
+          )}
         </>
       )}
     </aside>
