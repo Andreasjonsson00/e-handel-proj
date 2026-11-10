@@ -9,7 +9,7 @@ const Cart = ({
   addToCart,
   removeFromCart,
   setCart,
-  auth,
+  customer,
   cartTotalPrice,
   cartTotalQuantity,
   className = "",
@@ -62,7 +62,7 @@ const Cart = ({
               className="checkout-button"
               type="button"
               onClick={() => {
-                if (!auth) {
+                if (!customer) {
                   navigate("/login");
 
                   return;

@@ -1,11 +1,9 @@
 import jwt from "jsonwebtoken";
 
-function getTokenFromRequest(req) {
-  const authHeader = req.headers.authorization ?? "";
+const sessionSecret = process.env.SESSION_TOKEN_SECRET ?? process.env.JWT_SECRET;
 
-  return authHeader.startsWith("Bearer ")
-    ? authHeader.slice("Bearer ".length)
-    : "";
+function getTokenFromRequest(req) {
+  return req.cookies?.session ?? "";
 }
 
 export function requireAuth(req, res, next) {
@@ -18,7 +16,8 @@ export function requireAuth(req, res, next) {
   }
 
   try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = jwt.verify(token, sessionSecret);
+    res.locals.customer = req.user;
     next();
   } catch {
     return res.status(401).json({

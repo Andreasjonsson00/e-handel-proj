@@ -6,8 +6,10 @@ import Orders from "./pages/Orders";
 import AdminProducts from "./pages/AdminProducts";
 import ReturnPage from "./pages/ReturnPage";
 import CheckoutPage from "./pages/CheckoutPage";
+import { useCustomer } from "./context/CustomerProvider";
 
 function App() {
+  const { customer, isLoadingCustomer, logout } = useCustomer();
   const [cart, setCart] = useState(() => {
     const savedCart = localStorage.getItem("cart");
     return savedCart ? JSON.parse(savedCart) : [];
@@ -16,21 +18,6 @@ function App() {
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
-
-  const [auth, setAuth] = useState(() => {
-    const savedAuth = localStorage.getItem("auth");
-    return savedAuth ? JSON.parse(savedAuth) : null;
-  });
-
-  function handleLogin(nextAuth) {
-    localStorage.setItem("auth", JSON.stringify(nextAuth));
-    setAuth(nextAuth);
-  }
-
-  function handleLogout() {
-    localStorage.removeItem("auth");
-    setAuth(null);
-  }
 
   function addToCart(product) {
     setCart((currentCart) => {
@@ -90,8 +77,8 @@ function App() {
         path="/"
         element={
           <Frontpage
-            auth={auth}
-            onLogout={handleLogout}
+            customer={customer}
+            onLogout={logout}
             cart={cart}
             setCart={setCart}
             addToCart={addToCart}
@@ -106,27 +93,27 @@ function App() {
       <Route
         path="/login"
         element={
-          auth ? <Navigate to="/" replace /> : <Login onLogin={handleLogin} />
+          isLoadingCustomer ? null : customer ? <Navigate to="/" replace /> : <Login />
         }
       />
       <Route
         path="/orders"
-        element={<Orders auth={auth} onLogout={handleLogout} />}
+        element={<Orders customer={customer} onLogout={logout} />}
       />
       <Route
         path="/admin/products"
-        element={<AdminProducts auth={auth} onLogout={handleLogout} />}
+        element={<AdminProducts customer={customer} onLogout={logout} />}
       />
       <Route
         path="/return"
-        element={<ReturnPage auth={auth} onLogout={handleLogout} />}
+        element={<ReturnPage customer={customer} onLogout={logout} />}
       />
       <Route
         path="/checkout"
         element={
           <CheckoutPage
-            auth={auth}
-            onLogout={handleLogout}
+            customer={customer}
+            onLogout={logout}
             cart={cart}
             setCart={setCart}
             addToCart={addToCart}

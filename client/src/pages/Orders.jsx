@@ -1,11 +1,9 @@
 import Header from "../components/Header";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../api";
 import "./Orders.css";
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
-
-const Orders = ({ auth, onLogout }) => {
+const Orders = ({ customer, onLogout }) => {
   const [orders, setOrders] = useState([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -17,7 +15,7 @@ const Orders = ({ auth, onLogout }) => {
     }, 500);
 
     async function fetchOrders() {
-      if (!auth) {
+      if (!customer) {
         setError("Du måste vara inloggad för att se ordrar.");
         return;
       }
@@ -26,11 +24,7 @@ const Orders = ({ auth, onLogout }) => {
         setIsLoading(true);
         setError(null);
 
-        const response = await axios.get(`${API_URL}/api/orders`, {
-          headers: {
-            Authorization: `Bearer ${auth.token}`,
-          },
-        });
+        const response = await api.get("/api/orders");
         setOrders(response.data);
       } catch (err) {
         console.error(err);
@@ -43,10 +37,10 @@ const Orders = ({ auth, onLogout }) => {
 
     fetchOrders();
     return () => clearTimeout(timer);
-  }, [auth]);
+  }, [customer]);
   return (
     <>
-      <Header auth={auth} onLogout={onLogout} />
+      <Header customer={customer} onLogout={onLogout} />
       <main className="orders-page">
         <div className="page-heading">
           <h1>Ordrar</h1>
@@ -69,6 +63,7 @@ const Orders = ({ auth, onLogout }) => {
               <li className="order-card" key={order.id}>
                 <div className="order-header">
                   <h2>Order {order.id}</h2>
+                  <h3>{new Date(order.created_at).toLocaleString()}</h3>
                   <strong>{order.total_price}:-</strong>
                 </div>
 

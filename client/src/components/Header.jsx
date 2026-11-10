@@ -3,7 +3,7 @@ import "./Header.css";
 import { useCurrency } from "../context/CurrencyProvider";
 import { useState } from "react";
 
-const Header = ({ auth, onLogout }) => {
+const Header = ({ customer, onLogout }) => {
   const { currency, setCurrency } = useCurrency();
   const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
   const [isCurrencyMenuOpen, setIsCurrencyMenuOpen] = useState(false);
@@ -48,7 +48,7 @@ const Header = ({ auth, onLogout }) => {
               </div>
             )}
           </div>
-          {auth?.user.role === "admin" && (
+          {customer?.role === "admin" && (
             <div className="admin-dropdown">
               <button
                 type="button"
@@ -76,7 +76,7 @@ const Header = ({ auth, onLogout }) => {
             </div>
           )}
 
-          {auth ? (
+          {customer ? (
             <button type="button" onClick={onLogout}>
               Logga ut
             </button>
