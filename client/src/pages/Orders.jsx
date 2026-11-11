@@ -43,8 +43,12 @@ const Orders = ({ customer, onLogout }) => {
       <Header customer={customer} onLogout={onLogout} />
       <main className="orders-page">
         <div className="page-heading">
-          <h1>Ordrar</h1>
-          <p>Här visas skapade ordrar och produkterna i varje order.</p>
+          <h1>{customer?.role === "admin" ? "Alla ordrar" : "Mina ordrar"}</h1>
+          <p>
+            {customer?.role === "admin"
+              ? "Här visas alla skapade ordrar och produkterna i varje order."
+              : "Här visas dina skapade ordrar och produkterna i varje order."}
+          </p>
         </div>
 
         {isLoading ? (

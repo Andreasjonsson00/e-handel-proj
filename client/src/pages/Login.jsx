@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api, { API_URL } from "../api";
 import { useCustomer } from "../context/CustomerProvider";
 import "./Login.css";
+import Header from "../components/Header";
 
 // Servern skickar tillbaka användaren hit med ?error=… när inloggningen misslyckas
 const ERRORS = {
@@ -43,6 +44,8 @@ function Login() {
   if (isLoadingCustomer) return <main>Laddar…</main>;
 
   return (
+    <>
+    <Header />
     <main className="login-page">
       {!customer && (
         <form className="login-card" onSubmit={handleSubmit}>
@@ -91,6 +94,7 @@ function Login() {
         </form>
       )}
     </main>
+    </>
   );
 }
 

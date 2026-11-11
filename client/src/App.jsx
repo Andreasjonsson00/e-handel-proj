@@ -98,7 +98,13 @@ function App() {
       />
       <Route
         path="/orders"
-        element={<Orders customer={customer} onLogout={logout} />}
+        element={
+          isLoadingCustomer ? null : customer ? (
+            <Orders customer={customer} onLogout={logout} />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
       />
       <Route
         path="/admin/products"

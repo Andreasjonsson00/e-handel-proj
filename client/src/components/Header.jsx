@@ -62,7 +62,7 @@ const Header = ({ customer, onLogout }) => {
               {isAdminMenuOpen && (
                 <div className="admin-dropdown-menu">
                   <Link to="/orders" onClick={() => setIsAdminMenuOpen(false)}>
-                    Ordrar
+                    Alla ordrar
                   </Link>
 
                   <Link
@@ -74,6 +74,12 @@ const Header = ({ customer, onLogout }) => {
                 </div>
               )}
             </div>
+          )}
+
+          {customer && customer.role !== "admin" && (
+            <button>
+              <Link to="/orders">Mina ordrar</Link>
+            </button>
           )}
 
           {customer ? (
