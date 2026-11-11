@@ -10,7 +10,9 @@ const ERRORS = {
   cancelled: "Du avbröt inloggningen hos Google.",
   state: "Inloggningen kunde inte verifieras. Försök igen.",
   "not-verified": "Din e-postadress är inte verifierad av Google.",
+  "not-admin": "Det här GitHub-kontot saknar administratörsbehörighet.",
   google: "Google svarar inte. Försök igen senare.",
+  github: "GitHub svarar inte. Försök igen senare.",
 };
 
 function Login() {
@@ -90,6 +92,12 @@ function Login() {
             href={`${API_URL}/api/auth/google`}
           >
             Logga in med Google
+          </a>
+          <a
+            className="login-button github-login-button"
+            href={`${API_URL}/api/auth/github`}
+          >
+            Logga in med GitHub
           </a>
         </form>
       )}

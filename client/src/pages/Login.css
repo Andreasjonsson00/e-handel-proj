@@ -64,6 +64,24 @@
   transform: translateY(-1px);
   box-shadow: 0 8px 18px rgb(23 72 58 / 18%);
 }
+.github-login-button:hover {
+  background: #a85722;
+}
+.github-login-button {
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 700;
+  border-radius: 999px;
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+.github-login-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgb(23 72 58 / 18%);
+}
 @media (max-width: 500px) {
   .login-page {
     padding: 18px;

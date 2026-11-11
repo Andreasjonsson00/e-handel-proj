@@ -10,6 +10,7 @@ import searchRoutes from "./routes/searchRoutes.js";
 import stripeRoutes from "./routes/stripeRoutes.js";
 import checkoutRoutes from "./routes/checkoutRoutes.js";
 import shippingRoutes from "./routes/shippingRoutes.js";
+import issuesRouter from './routes/issuesRoutes.js'
 import cookieParser from "cookie-parser";
 
 const app = express();
@@ -30,6 +31,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use('/api/admin/issues', issuesRouter)
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/currency", currencyRoutes);

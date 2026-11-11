@@ -14,7 +14,7 @@ if (!CLIENT_ID || !CLIENT_SECRET || !CALLBACK_URL) {
 }
 
 /* --- 1. Where we send the user: Google's own login page --- */
-export function getAuthorizeUrl(state) {
+export function getGoogleAuthorizeUrl(state) {
   const params = new URLSearchParams({
     response_type: "code", // Authorization Code flow
     client_id: CLIENT_ID,
@@ -34,7 +34,7 @@ export function getAuthorizeUrl(state) {
 
 /* --- 2. The code from the callback → Google's ID token → who the user is --- */
 // Server to server: the client secret never reaches the browser.
-export async function exchangeCode(code) {
+export async function exchangeGoogleCode(code) {
   const response = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     body: new URLSearchParams({
