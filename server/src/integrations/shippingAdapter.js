@@ -2,6 +2,7 @@ import {
   postNordAnswerSchema,
   postNordTransitTimeSchema,
 } from "../schemas/shippingSchema.js";
+import { z } from "zod";
 
 const API_KEY = process.env.POSTNORD_API_KEY ?? "";
 const ORIGIN_POSTAL_CODE = process.env.POSTNORD_ORIGIN_POSTAL_CODE ?? "";

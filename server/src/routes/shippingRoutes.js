@@ -5,6 +5,7 @@ import {
 } from "../integrations/shippingAdapter.js";
 import { postalCodeSchema } from "../schemas/postalCodeSchema.js";
 import { transitTimeQuerySchema } from "../schemas/shippingSchema.js";
+import { z } from "zod";
 
 const router = express.Router();
 
