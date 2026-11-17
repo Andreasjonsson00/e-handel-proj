@@ -49,6 +49,19 @@
 .google-login-button:hover {
   background: #a85722;
 }
+.form-switch-button {
+  width: 100%;
+  margin-top: 12px;
+  padding: 8px;
+  border: 0;
+  background: transparent;
+  color: #38574b;
+  font-weight: 700;
+  text-decoration: underline;
+}
+.form-switch-button:hover {
+  color: #a85722;
+}
 .google-login-button {
   display: grid;
   place-items: center;

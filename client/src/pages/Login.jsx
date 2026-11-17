@@ -22,6 +22,7 @@ function Login() {
 
   const [form, setForm] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
+  const [isRegistering, setIsRegistering] = useState(false);
 
   function updateField(event) {
     const { name, value } = event.target;
@@ -33,7 +34,7 @@ function Login() {
     setError("");
 
     try {
-      await api.post("/api/auth/login", form);
+      await api.post(isRegistering ? "/api/auth/register" : "/api/auth/login", form);
 
       await refreshCustomer();
       navigate("/");
@@ -53,8 +54,8 @@ function Login() {
         <form className="login-card" onSubmit={handleSubmit}>
           <div className="login-heading">
             <p>Min e-handel</p>
-            <h1>Logga in</h1>
-            <p>Demo: user/user123</p>
+            <h1>{isRegistering ? "Skapa konto" : "Logga in"}</h1>
+            <p>{isRegistering ? "Välj ett lösenord med minst 8 tecken." : "Logga in på ditt konto."}</p>
           </div>
 
           <label className="form-field">
@@ -64,6 +65,8 @@ function Login() {
               value={form.username}
               onChange={updateField}
               autoComplete="username"
+              minLength="3"
+              maxLength="50"
               required
             />
           </label>
@@ -75,7 +78,9 @@ function Login() {
               type="password"
               value={form.password}
               onChange={updateField}
-              autoComplete="current-password"
+              autoComplete={isRegistering ? "new-password" : "current-password"}
+              minLength="8"
+              maxLength="72"
               required
             />
           </label>
@@ -84,21 +89,30 @@ function Login() {
           {urlError && <p className="form-error">{ERRORS[urlError] ?? "Något gick fel."}</p>}
 
           <button className="login-button" type="submit">
-            Logga in
+            {isRegistering ? "Skapa konto" : "Logga in"}
           </button>
 
-          <a
-            className="login-button google-login-button"
-            href={`${API_URL}/api/auth/google`}
+          <button
+            className="form-switch-button"
+            type="button"
+            onClick={() => {
+              setIsRegistering((value) => !value);
+              setError("");
+            }}
           >
-            Logga in med Google
-          </a>
-          <a
-            className="login-button github-login-button"
-            href={`${API_URL}/api/auth/github`}
-          >
-            Logga in med GitHub
-          </a>
+            {isRegistering ? "Har du redan ett konto? Logga in" : "Saknar du konto? Skapa ett"}
+          </button>
+
+          {!isRegistering && (
+            <>
+              <a className="login-button google-login-button" href={`${API_URL}/api/auth/google`}>
+                Logga in med Google
+              </a>
+              <a className="login-button github-login-button" href={`${API_URL}/api/auth/github`}>
+                Logga in med GitHub
+              </a>
+            </>
+          )}
         </form>
       )}
     </main>

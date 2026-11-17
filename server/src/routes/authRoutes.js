@@ -1,4 +1,5 @@
 import { Router } from "express";
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import {
   exchangeGoogleCode,
@@ -12,6 +13,7 @@ import { pool } from "../db.js";
 const router = Router();
 
 const SESSION_SECONDS = 8 * 60 * 60; // 8 hours – one token, as in L8's "The simple way"
+const BCRYPT_ROUNDS = 12;
 const sessionSecret = process.env.SESSION_TOKEN_SECRET ?? process.env.JWT_SECRET;
 
 // sameSite 'lax': the cookie IS sent when Google sends the user back to us (a normal navigation).
@@ -199,9 +201,64 @@ router.post("/logout", (_req, res) => {
 });
 
 
+function createSession(res, user) {
+  const publicUser = {
+    id: user.id,
+    username: user.username,
+    role: user.role,
+  };
+
+  const token = jwt.sign(publicUser, sessionSecret, {
+    expiresIn: SESSION_SECONDS,
+  });
+
+  res.cookie("session", token, {
+    ...COOKIE,
+    maxAge: SESSION_SECONDS * 1000,
+  });
+
+  return publicUser;
+}
+
+// --- REGISTER: POST /api/auth/register { username, password } → { user } ---
+router.post("/register", async (req, res, next) => {
+  const username = typeof req.body.username === "string" ? req.body.username.trim() : "";
+  const { password } = req.body;
+
+  if (username.length < 3 || username.length > 50) {
+    return res.status(400).json({ message: "Användarnamnet måste vara 3–50 tecken." });
+  }
+  if (
+    typeof password !== "string" ||
+    password.length < 8 ||
+    Buffer.byteLength(password, "utf8") > 72
+  ) {
+    return res.status(400).json({ message: "Lösenordet måste vara minst 8 tecken och högst 72 byte." });
+  }
+
+  try {
+    const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+    const result = await pool.query(
+      `INSERT INTO users (username, password, role)
+       VALUES ($1, $2, 'user')
+       RETURNING id, username, role`,
+      [username, passwordHash],
+    );
+    const user = result.rows[0];
+
+    res.status(201).json({ user: createSession(res, user) });
+  } catch (err) {
+    if (err.code === "23505") {
+      return res.status(409).json({ message: "Användarnamnet är redan upptaget." });
+    }
+    next(err);
+  }
+});
+
 // --- LOGIN: POST /api/auth/login { username, password } → { user } ---
 router.post("/login", async (req, res, next) => {
-  const { username, password } = req.body;
+  const username = typeof req.body.username === "string" ? req.body.username.trim() : "";
+  const { password } = req.body;
 
   try {
     const result = await pool.query(
@@ -212,8 +269,11 @@ router.post("/login", async (req, res, next) => {
     );
 
     const user = result.rows[0];
-
-    const passwordOk = user && user.password === password;
+    const passwordOk =
+      user &&
+      typeof password === "string" &&
+      typeof user.password === "string" &&
+      (await bcrypt.compare(password, user.password));
 
     if (!passwordOk) {
       return res
@@ -221,22 +281,7 @@ router.post("/login", async (req, res, next) => {
         .json({ message: "Fel användarnamn eller lösenord." });
     }
 
-    const publicUser = {
-      id: user.id,
-      username: user.username,
-      role: user.role,
-    };
-
-    const token = jwt.sign(publicUser, sessionSecret, {
-      expiresIn: SESSION_SECONDS,
-    });
-
-    res.cookie("session", token, {
-      ...COOKIE,
-      maxAge: SESSION_SECONDS * 1000,
-    });
-
-    res.json({ user: publicUser });
+    res.json({ user: createSession(res, user) });
   } catch (err) {
     next(err);
   }

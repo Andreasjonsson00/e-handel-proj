@@ -41,7 +41,7 @@ En fullstack-shop för elektronik med React/Vite i klienten och Express i server
 
 ### Testkonton och integrationer
 
-Shoppen har ingen publik registrering. Logga in med användarnamn user samt user123 för inlogg. Se `.env.example` för vilka variabler som krävs.
+Shoppen har publik registrering. Lösenord hashas med bcrypt innan de sparas. Se `.env.example` för vilka variabler som krävs.
 
 För Stripe i testläge kan betalningen slutföras med kortnumret `4242 4242 4242 4242`, valfritt framtida datum, valfri CVC och valfritt postnummer. För att ordern ska bli `paid` lokalt måste Stripe-webhooken kunna nå Express. Kör exempelvis `stripe listen --forward-to localhost:3000/api/stripe/webhook` och lägg värdet `whsec_...` som kommandot visar i `STRIPE_WEBHOOK_SECRET`.
 
