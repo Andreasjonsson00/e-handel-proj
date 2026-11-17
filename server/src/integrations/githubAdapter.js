@@ -1,7 +1,6 @@
 const CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
 const CALLBACK_URL = process.env.GITHUB_CALLBACK_URL;
-const REPO = process.env.GITHUB_REPO; // owner/repo, e.g. anna-k/hoodie-shop
 // The SHOP'S own token – a fine-grained personal access token with Issues: Read and write, only for REPO
 const SHOP_TOKEN = process.env.GITHUB_ISSUES_TOKEN;
 
@@ -63,23 +62,4 @@ export async function getUser(accessToken) {
     id: user.id,
     login: user.login,
   };
-}
-
-/* ===== ISSUES – with the SHOP'S token, so GitHub shows the shop's account as the author ===== */
-
-// YOUR TURN: fill in createIssue() and listOpenIssues().
-// Getting started with GitHub's REST API – the headers, the token, the answers:
-//   https://docs.github.com/en/rest/using-the-rest-api/getting-started-with-the-rest-api
-// The same pattern as getUser() above – but with SHOP_TOKEN and REPO, not the admin's token.
-
-// Docs: https://docs.github.com/en/rest/issues/issues#create-an-issue
-// Return { number, title, url } – routes/issues.ts and React use them.
-export async function createIssue(title, body) {
-  throw new Error("createIssue() is not done yet");
-}
-
-// Docs: https://docs.github.com/en/rest/issues/issues#list-repository-issues
-// Return [{ number, title, url, author }] – React shows them in the list.
-export async function listOpenIssues() {
-  throw new Error("listOpenIssues() is not done yet");
 }
