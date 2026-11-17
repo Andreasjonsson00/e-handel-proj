@@ -39,9 +39,22 @@ En fullstack-shop för elektronik med React/Vite i klienten och Express i server
 
    Klienten kör normalt på `http://localhost:5173` och servern på `http://localhost:3000`.
 
-### Testkonton och integrationer
+### Konton och autentisering
 
-Shoppen har publik registrering. Lösenord hashas med bcrypt innan de sparas. Se `.env.example` för vilka variabler som krävs.
+Shoppen har publik registrering via inloggningssidan. När ett konto skapas skickar klienten användarnamn och lösenord till servern över API:t. Servern validerar inmatningen och hashar sedan lösenordet med bcrypt (12 rundor) innan det sparas i `users.password`. Klartextlösenord returneras aldrig från API:t eller sparas för nya konton.
+
+Det går även att logga in med Google eller GitHub från inloggningssidan. Google-inloggning skapar eller uppdaterar ett kundkonto när e-postadressen är verifierad hos Google. GitHub-inloggning används för administratörer och fungerar för de GitHub-användarnamn som anges i `ADMIN_GITHUB_LOGINS` på servern.
+
+| Metod och endpoint | Beskrivning |
+| --- | --- |
+| `POST /api/auth/register` | Skapar ett konto och sätter en inloggningscookie. Kräver ett användarnamn på 3–50 tecken och ett lösenord på minst 8 tecken (max 72 byte). |
+| `POST /api/auth/login` | Verifierar lösenordet med bcrypt och sätter en inloggningscookie. |
+| `POST /api/auth/logout` | Tar bort inloggningscookien. |
+| `GET /api/auth/me` | Returnerar den inloggade användaren. |
+
+### Integrationer
+
+Se `.env.example` för vilka variabler som krävs.
 
 För Stripe i testläge kan betalningen slutföras med kortnumret `4242 4242 4242 4242`, valfritt framtida datum, valfri CVC och valfritt postnummer. För att ordern ska bli `paid` lokalt måste Stripe-webhooken kunna nå Express. Kör exempelvis `stripe listen --forward-to localhost:3000/api/stripe/webhook` och lägg värdet `whsec_...` som kommandot visar i `STRIPE_WEBHOOK_SECRET`.
 
