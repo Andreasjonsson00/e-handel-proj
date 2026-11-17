@@ -1,17 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api";
 import Header from "../components/Header";
 import "./CheckoutPage.css";
 import { useCurrency } from "../context/CurrencyProvider";
 import Cart from "../components/Cart";
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
-
 function CheckoutPage({
   cart,
   setCart,
-  auth,
+  customer,
   onLogout,
   cartTotalPrice,
   addToCart,
@@ -51,7 +49,7 @@ function CheckoutPage({
     const timeout = window.setTimeout(async () => {
       try {
         setLoadingTransitTime(true);
-        const response = await axios.get(`${API_URL}/api/shipping/transit-time`, {
+        const response = await api.get("/api/shipping/transit-time", {
           params: { postalCode: normalizedPostalCode, shippingMethod },
           signal: controller.signal,
         });
@@ -76,8 +74,8 @@ function CheckoutPage({
     setSelectedServicePoint("");
 
     try {
-      const response = await axios.get(
-        `${API_URL}/api/shipping/service-points`,
+      const response = await api.get(
+        "/api/shipping/service-points",
         {
           params: { postalCode },
         },
@@ -98,7 +96,7 @@ function CheckoutPage({
     event.preventDefault();
     setError("");
 
-    if (!auth?.token) {
+    if (!customer) {
       navigate("/login");
       return;
     }
@@ -116,8 +114,8 @@ function CheckoutPage({
     try {
       setIsCheckingOut(true);
 
-      const response = await axios.post(
-        `${API_URL}/api/checkout/hosted`,
+      const response = await api.post(
+        "/api/checkout/hosted",
         {
           items: cart.map((item) => ({
             productId: item.product.id,
@@ -127,11 +125,6 @@ function CheckoutPage({
           postalCode: postalCode.trim(),
           servicePointId:
             shippingMethod === "pickup" ? selectedServicePoint : null,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${auth.token}`,
-          },
         },
       );
 
@@ -160,7 +153,7 @@ function CheckoutPage({
 
   return (
     <>
-      <Header auth={auth} onLogout={onLogout} />
+      <Header customer={customer} onLogout={onLogout} />
       <main className="checkout-page-container">
         <form className="checkout-form" onSubmit={handleCheckout}>
           <h1 className="checkout-page-heading">Kassan</h1>
@@ -331,7 +324,7 @@ function CheckoutPage({
           decreaseQuantity={decreaseQuantity}
           addToCart={addToCart}
           removeFromCart={removeFromCart}
-          auth={auth}
+          customer={customer}
           cartTotalPrice={cartTotalPrice}
         />
       </main>

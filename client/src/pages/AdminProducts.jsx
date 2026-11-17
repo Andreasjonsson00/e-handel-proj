@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api";
 import { Navigate } from "react-router-dom";
 import Header from "../components/Header";
 import "./AdminProducts.css";
 import SearchBar from "../components/SearchBar";
-
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
 const emptyForm = {
   name: "",
@@ -15,7 +13,7 @@ const emptyForm = {
   stock: "",
 };
 
-function AdminProducts({ auth, onLogout }) {
+function AdminProducts({ customer, onLogout }) {
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [editingProductId, setEditingProductId] = useState(null);
@@ -77,15 +75,7 @@ function AdminProducts({ auth, onLogout }) {
     try {
       setIsIndexing(true);
 
-      await axios.post(
-        `${API_URL}/api/products/index`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${auth.token}`,
-          },
-        },
-      );
+      await api.post("/api/products/index", {});
 
       setMessage(`Produkter har indexerats i sökfunktionen.`);
     } catch (err) {
@@ -114,17 +104,10 @@ function AdminProducts({ auth, onLogout }) {
     try {
       setIsSaving(true);
 
-      const config = {
-        headers: {
-          Authorization: `Bearer ${auth.token}`,
-        },
-      };
-
       if (isEditing) {
-        const response = await axios.put(
-          `${API_URL}/api/products/${editingProductId}`,
+        const response = await api.put(
+          `/api/products/${editingProductId}`,
           payload,
-          config,
         );
 
         setProducts((currentProducts) =>
@@ -136,13 +119,13 @@ function AdminProducts({ auth, onLogout }) {
         );
         setMessage("Produkten har uppdaterats.");
       } else {
-        await axios.post(`${API_URL}/api/products`, payload, config);
+        await api.post("/api/products", payload);
 
         const endpoint = searchQuery
-          ? `${API_URL}/api/search?q=${encodeURIComponent(searchQuery)}&page=${page}&pageSize=9`
-          : `${API_URL}/api/products?page=${page}&pageSize=9`;
+          ? `/api/search?q=${encodeURIComponent(searchQuery)}&page=${page}&pageSize=9`
+          : `/api/products?page=${page}&pageSize=9`;
 
-        const productsResponse = await axios.get(endpoint);
+        const productsResponse = await api.get(endpoint);
 
         setProducts(productsResponse.data.data);
 
@@ -171,11 +154,7 @@ function AdminProducts({ auth, onLogout }) {
     setMessage("");
 
     try {
-      await axios.delete(`${API_URL}/api/products/${productId}`, {
-        headers: {
-          Authorization: `Bearer ${auth.token}`,
-        },
-      });
+      await api.delete(`/api/products/${productId}`);
 
       setProducts((currentProducts) =>
         currentProducts.filter((product) => product.id !== productId),
@@ -201,15 +180,7 @@ function AdminProducts({ auth, onLogout }) {
     try {
       setIsImporting(true);
 
-      const response = await axios.post(
-        `${API_URL}/api/products/import/${format}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${auth.token}`,
-          },
-        },
-      );
+      const response = await api.post(`/api/products/import/${format}`, {});
 
       setImportResult({
         format,
@@ -218,9 +189,7 @@ function AdminProducts({ auth, onLogout }) {
 
       setMessage(`${format.toUpperCase()}-importen är klar.`);
 
-      const productsResponse = await axios.get(
-        `${API_URL}/api/products?page=${page}&pageSize=9`,
-      );
+      const productsResponse = await api.get(`/api/products?page=${page}&pageSize=9`);
 
       setProducts(productsResponse.data.data);
 
@@ -249,10 +218,10 @@ function AdminProducts({ auth, onLogout }) {
         setError("");
 
         const endpoint = searchQuery
-          ? `${API_URL}/api/search?q=${encodeURIComponent(searchQuery)}&page=${page}&pageSize=9`
-          : `${API_URL}/api/products?page=${page}&pageSize=9`;
+          ? `/api/search?q=${encodeURIComponent(searchQuery)}&page=${page}&pageSize=9`
+          : `/api/products?page=${page}&pageSize=9`;
 
-        const response = await axios.get(endpoint);
+        const response = await api.get(endpoint);
 
         setProducts(response.data.data);
 
@@ -270,7 +239,7 @@ function AdminProducts({ auth, onLogout }) {
     return () => clearTimeout(timer);
   }, [page, searchQuery]);
 
-  if (!auth || auth.user.role !== "admin") {
+  if (!customer || customer.role !== "admin") {
     return <Navigate to="/login" replace />;
   }
 
@@ -295,15 +264,9 @@ function AdminProducts({ auth, onLogout }) {
     formData.append("image", file);
 
     try {
-      const response = await axios.post(
-        `${API_URL}/api/products/${editingProductId}/image`,
+      const response = await api.post(
+        `/api/products/${editingProductId}/image`,
         formData,
-
-        {
-          headers: {
-            Authorization: `Bearer ${auth.token}`,
-          },
-        },
       );
 
       setProducts((currentProducts) =>
@@ -346,11 +309,7 @@ function AdminProducts({ auth, onLogout }) {
     try {
       setIsUploading(true);
 
-      await axios.delete(`${API_URL}/api/products/${productId}/image`, {
-        headers: {
-          Authorization: `Bearer ${auth.token}`,
-        },
-      });
+      await api.delete(`/api/products/${productId}/image`);
 
       setProducts((currentProducts) =>
         currentProducts.map((product) =>
@@ -375,7 +334,7 @@ function AdminProducts({ auth, onLogout }) {
 
   return (
     <>
-      <Header auth={auth} onLogout={onLogout} />
+      <Header customer={customer} onLogout={onLogout} />
       <main className="admin-products-page-container">
         <div className="page-heading">
           <h1>Produkter</h1>

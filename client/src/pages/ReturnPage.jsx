@@ -2,10 +2,9 @@ import { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import Header from "../components/Header";
 import "./ReturnPage.css";
+import { API_URL } from "../api";
 
-const API_URL = import.meta.env.VITE_API_URL ?? "";
-
-const ReturnPage = ({ auth, onLogout }) => {
+const ReturnPage = ({ customer, onLogout }) => {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get("session_id");
 
@@ -25,9 +24,7 @@ const ReturnPage = ({ auth, onLogout }) => {
         const response = await fetch(
           `${API_URL}/api/checkout/status?session_id=${encodeURIComponent(sessionId)}`,
           {
-            headers: {
-              Authorization: `Bearer ${auth.token}`,
-            },
+            credentials: "include",
           },
         );
 
@@ -62,7 +59,7 @@ const ReturnPage = ({ auth, onLogout }) => {
 
     checkPayment();
     return () => clearTimeout(timer);
-  }, [sessionId, auth?.token]);
+  }, [sessionId, customer]);
 
   if (!sessionId) {
     return (
@@ -111,7 +108,7 @@ const ReturnPage = ({ auth, onLogout }) => {
 
   return (
     <>
-      <Header auth={auth} onLogout={onLogout} />
+      <Header customer={customer} onLogout={onLogout} />
       <main className="return-page-container">
         <h1>Tack för din beställning!</h1>
         <p>Din betalning är bekräftad.</p>

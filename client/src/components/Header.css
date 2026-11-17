@@ -39,9 +39,6 @@
   font-size: 0.9rem;
   font-weight: 700;
 }
-.site-header nav a {
-  color: #36564a;
-}
 .site-header nav a:hover {
   background: rgb(255 255 255 / 64%);
 }

@@ -1,17 +1,13 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api";
 import Header from "../components/Header";
 import "./Frontpage.css";
 import ProductList from "../components/ProductList";
 import Cart from "../components/Cart";
 import SearchBar from "../components/SearchBar";
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
-
-
-
 function Frontpage({
-  auth,
+  customer,
   onLogout,
   cart,
   setCart,
@@ -48,10 +44,10 @@ function Frontpage({
         setError(null);
 
         const endpoint = searchQuery
-          ? `${API_URL}/api/search?q=${encodeURIComponent(searchQuery)}&page=${page}&pageSize=9`
-          : `${API_URL}/api/products?page=${page}&pageSize=9`;
+          ? `/api/search?q=${encodeURIComponent(searchQuery)}&page=${page}&pageSize=9`
+          : `/api/products?page=${page}&pageSize=9`;
 
-        const response = await axios.get(endpoint);
+        const response = await api.get(endpoint);
 
         setProducts(response.data);
 
@@ -74,7 +70,7 @@ function Frontpage({
 
   return (
     <>
-      <Header auth={auth} onLogout={onLogout} />
+      <Header customer={customer} onLogout={onLogout} />
       <main className="container">
         <section className="storefront">
           <div className="page-heading">
@@ -142,7 +138,7 @@ function Frontpage({
           decreaseQuantity={decreaseQuantity}
           addToCart={addToCart}
           removeFromCart={removeFromCart}
-          auth={auth}
+              customer={customer}
           cartTotalPrice={cartTotalPrice}
         />
       </main>
