@@ -1,8 +1,6 @@
 const CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
 const CALLBACK_URL = process.env.GITHUB_CALLBACK_URL;
-// The SHOP'S own token – a fine-grained personal access token with Issues: Read and write, only for REPO
-const SHOP_TOKEN = process.env.GITHUB_ISSUES_TOKEN;
 
 /* ===== LOGIN – with the ADMIN'S GitHub account ===== */
 
