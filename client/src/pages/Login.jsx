@@ -20,7 +20,7 @@ function Login() {
   const navigate = useNavigate();
   const urlError = new URLSearchParams(window.location.search).get("error");
 
-  const [form, setForm] = useState({ username: "", password: "" });
+  const [form, setForm] = useState({ username: "", email: "", password: "" });
   const [error, setError] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
 
@@ -70,6 +70,20 @@ function Login() {
               required
             />
           </label>
+
+          {isRegistering && (
+            <label className="form-field">
+              E-postadress
+              <input
+                name="email"
+                type="email"
+                value={form.email}
+                onChange={updateField}
+                autoComplete="email"
+                required
+              />
+            </label>
+          )}
 
           <label className="form-field">
             Lösenord
