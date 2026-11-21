@@ -1,6 +1,7 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { z } from "zod";
 import {
   exchangeGoogleCode,
     getGoogleAuthorizeUrl,
@@ -220,13 +221,17 @@ function createSession(res, user) {
   return publicUser;
 }
 
-// --- REGISTER: POST /api/auth/register { username, password } → { user } ---
+// --- REGISTER: POST /api/auth/register { username, email, password } → { user } ---
 router.post("/register", async (req, res, next) => {
   const username = typeof req.body.username === "string" ? req.body.username.trim() : "";
+  const email = typeof req.body.email === "string" ? req.body.email.trim().toLowerCase() : "";
   const { password } = req.body;
 
   if (username.length < 3 || username.length > 50) {
     return res.status(400).json({ message: "Användarnamnet måste vara 3–50 tecken." });
+  }
+  if (!z.string().email().safeParse(email).success) {
+    return res.status(400).json({ message: "Ange en giltig e-postadress." });
   }
   if (
     typeof password !== "string" ||
@@ -239,10 +244,10 @@ router.post("/register", async (req, res, next) => {
   try {
     const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
     const result = await pool.query(
-      `INSERT INTO users (username, password, role)
-       VALUES ($1, $2, 'user')
-       RETURNING id, username, role`,
-      [username, passwordHash],
+      `INSERT INTO users (username, email, password, role)
+       VALUES ($1, $2, $3, 'user')
+       RETURNING id, username, email, role`,
+      [username, email, passwordHash],
     );
     const user = result.rows[0];
 

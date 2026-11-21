@@ -1,6 +1,8 @@
 import express, { Router } from "express";
 import { verifyWebhook } from "../integrations/paymentAdapter.js";
 import { pool } from "../db.js";
+import { sendEmail } from "../integrations/emailAdapter.js";
+import { orderConfirmation } from "../../lib/orderConfirmation.js";
 
 const router = Router();
 
@@ -47,6 +49,7 @@ router.post(
         }
 
         const client = await pool.connect();
+        let wasPaid = false;
 
         try {
           await client.query("BEGIN");
@@ -106,6 +109,7 @@ router.post(
 
           // 7. Bekräfta båda ändringarna samtidigt
           await client.query("COMMIT");
+          wasPaid = true;
 
           console.log("[WEBHOOK] Order paid and stock updated:", orderId);
         } catch (error) {
@@ -114,6 +118,58 @@ router.post(
           return res.status(500).send("Order processing failed");
         } finally {
           client.release();
+        }
+
+        // Resend failures must never undo a successful payment. The provider uses this
+        // key to suppress duplicates if Stripe delivers the same webhook again.
+        if (wasPaid) {
+          try {
+            const orderResult = await pool.query(
+              `SELECT
+                 o.id,
+                 o.total_price AS "totalPrice",
+                 COALESCE(u.name, u.username, 'kund') AS "customerName",
+                 u.email,
+                 COALESCE(
+                   json_agg(
+                     json_build_object(
+                       'name', p.name,
+                       'quantity', oi.quantity,
+                       'price', oi.price
+                     )
+                   ) FILTER (WHERE oi.id IS NOT NULL),
+                   '[]'
+                 ) AS items
+               FROM orders o
+               JOIN users u ON u.id = o.user_id
+               LEFT JOIN order_items oi ON oi.order_id = o.id
+               LEFT JOIN products p ON p.id = oi.product_id
+               WHERE o.id = $1
+               GROUP BY o.id, o.total_price, u.name, u.username, u.email`,
+              [orderId],
+            );
+            const order = orderResult.rows[0];
+
+            if (!order?.email) {
+              console.error("[EMAIL] No e-mail address for order:", orderId);
+            } else {
+              const { subject, html, text } = orderConfirmation(order);
+              const emailId = await sendEmail({
+                to: order.email,
+                subject,
+                html,
+                text,
+                idempotencyKey: `order-confirmation/${order.id}`,
+              });
+              console.log("[EMAIL] Order confirmation sent:", emailId);
+            }
+          } catch (error) {
+            console.error(
+              "[EMAIL] Failed to send order confirmation for order",
+              orderId,
+              error,
+            );
+          }
         }
 
         break;

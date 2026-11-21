@@ -1,5 +1,6 @@
 import { searchProducts } from "../integrations/searchAdapter.js";
 import { searchQuerySchema } from "../schemas/searchQuerySchema.js";
+import { z } from "zod";
 // Validate data from the USER before sending it on to another system.
 
 // GET /api/search?q=hoodie → search in Algolia
